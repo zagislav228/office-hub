@@ -562,9 +562,9 @@ func setWindowColor(hwnd uintptr, attr uint32, value int32) {
 	_, _, _ = setWindowAttrPtr.Call(hwnd, uintptr(attr), uintptr(unsafe.Pointer(&v)), unsafe.Sizeof(v))
 }
 
-// titleBarColor — тёмно-синий из палитры интерфейса (#16233a): отличается от фона приложения,
+// titleBarColor — тёмно-синий из палитры интерфейса (#121c2e): отличается от фона приложения,
 // но не спорит с карточками, как это делал бы ярко-синий акцент.
-const titleBarColor = 0x16233a
+const titleBarColor = 0x121c2e
 
 // paintTitleBar делает полосу заголовка контрастной основному фону приложения.
 func paintTitleBar(hwnd uintptr) {

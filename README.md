@@ -62,19 +62,3 @@ node server.mjs
 ссылки на `ms-settings:defaultapps` и `ms-settings:appsdefaults` — выбрать редактор один раз приходится вручную.
 
 Переносится в бесплатный офис хуже всего: макросы VBA, поля форм Word, сквозные нумерации и сложные комбинации плавающих объектов.
-
-## Как добавить свою программу
-
-Отредактируйте `catalog.json` — массив `apps`. Обязательные поля: `id` (ID пакета в winget), `name`, `category`,
-`replaces`, `formats`, `fidelity` (1–5), `license`, `summary`. Категории перечислены в массиве `categories`.
-Проверить ID: `winget show <имя>`. После правки перезагрузите страницу.
-
-## Структура
-
-```
-office-hub/
-├─ launch.bat          запуск: проверка Node + сервер + браузер
-├─ server.mjs          HTTP-сервер и обёртка над winget (без зависимостей)
-├─ catalog.json        каталог программ и категорий
-└─ public/index.html   интерфейс
-```

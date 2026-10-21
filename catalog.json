@@ -1,331 +1,569 @@
 {
+  "windowTitle": { "ru": "Office Hub — бесплатные замены Microsoft Office", "en": "Office Hub - free replacements for Microsoft Office" },
   "categories": [
-    { "id": "office", "title": "Офис: Word / Excel / PowerPoint" },
-    { "id": "docs", "title": "Документы, книги, библиографии" },
-    { "id": "notes", "title": "Заметки (замена OneNote)" },
-    { "id": "pdf", "title": "PDF" },
-    { "id": "visual", "title": "Графика и схемы (замена Visio / Publisher)" },
-    { "id": "mail", "title": "Почта и данные (замена Outlook / Access)" },
-    { "id": "cloud", "title": "Облако (замена OneDrive)" },
-    { "id": "system", "title": "Медиа, архивы, автоматизация" }
+    { "id": "office", "ru": "Офис: Word / Excel / PowerPoint", "en": "Office: Word / Excel / PowerPoint" },
+    { "id": "docs", "ru": "Документы, книги, библиографии", "en": "Documents, books, references" },
+    { "id": "notes", "ru": "Заметки (замена OneNote)", "en": "Notes (OneNote replacement)" },
+    { "id": "pdf", "ru": "PDF", "en": "PDF" },
+    { "id": "visual", "ru": "Графика и схемы (замена Visio / Publisher)", "en": "Graphics and diagrams (Visio / Publisher)" },
+    { "id": "mail", "ru": "Почта и данные (замена Outlook / Access)", "en": "Mail and data (Outlook / Access)" },
+    { "id": "cloud", "ru": "Облако (замена OneDrive)", "en": "Cloud storage (OneDrive)" },
+    { "id": "system", "ru": "Медиа, архивы, автоматизация", "en": "Media, archives, automation" }
   ],
   "apps": [
     {
       "id": "ONLYOFFICE.DesktopEditors",
       "name": "ONLYOFFICE Desktop Editors",
       "category": "office",
-      "replaces": "Word, Excel, PowerPoint",
       "formats": [".docx", ".xlsx", ".pptx", ".doc", ".xls", ".ppt", ".odt"],
       "fidelity": 5,
-      "license": "AGPL-3.0, полностью бесплатен, без рекламы",
-      "summary": "Самое близкое к MS Office по совместимости: OOXML (.docx/.xlsx/.pptx) — родной формат, верстка, таблицы, диаграммы и анимации слайдов сохраняются без искажений. Четыре редактора + стартаг и коннектор к своему серверу.",
-      "caveats": "Интерфейс не Ribbon-лента, а компактная панель — привыкнуть 1–2 дня."
+      "ru": {
+        "replaces": "Word, Excel, PowerPoint",
+        "license": "AGPL-3.0, полностью бесплатен, без рекламы",
+        "summary": "Самое близкое к MS Office по совместимости: OOXML (.docx/.xlsx/.pptx) — родной формат, верстка, таблицы, диаграммы и анимации слайдов сохраняются без искажений. Четыре редактора + стартап и коннектор к своему серверу.",
+        "caveats": "Интерфейс не Ribbon-лента, а компактная панель — привыкнуть 1–2 дня."
+      },
+      "en": {
+        "replaces": "Word, Excel, PowerPoint",
+        "license": "AGPL-3.0, completely free, no ads",
+        "summary": "The closest match to MS Office on compatibility: OOXML (.docx/.xlsx/.pptx) is its native format, so layout, tables, charts and slide animations survive intact. Four editors plus a start page and a connector to your own server.",
+        "caveats": "The toolbar is a compact panel rather than a Ribbon — takes a day or two to get used to."
+      }
     },
     {
       "id": "Kingsoft.WPSOffice",
       "name": "WPS Office",
       "category": "office",
-      "replaces": "Word, Excel, PowerPoint, PDF-ридер",
       "formats": [".docx", ".xlsx", ".pptx", ".doc", ".xls", ".ppt", ".pdf"],
       "fidelity": 5,
-      "license": "Бесплатная версия с рекламой и часть функций в подписке",
-      "summary": "Лента инструментов и диалоги почти один в один как в MS Office, .docx открывается с максимальной точностью. Вкладка-интерфейс: все документы в одном окне, как в Word с вкладками.",
-      "caveats": "Показывает рекламу и периодически предлагает подписку; после установки проверьте, не включён ли лишний облачный аккаунт."
+      "ru": {
+        "replaces": "Word, Excel, PowerPoint, PDF-ридер",
+        "license": "Бесплатная версия с рекламой и часть функций в подписке",
+        "summary": "Лента инструментов и диалоги почти один в один как в MS Office, .docx открывается с максимальной точностью. Вкладочный интерфейс: все документы в одном окне, как в Word с вкладками.",
+        "caveats": "Показывает рекламу и периодически предлагает подписку; после установки проверьте, не включён ли лишний облачный аккаунт."
+      },
+      "en": {
+        "replaces": "Word, Excel, PowerPoint, PDF reader",
+        "license": "Free tier with ads; some features behind a subscription",
+        "summary": "The Ribbon and the dialogs are nearly identical to MS Office, and .docx opens with very high accuracy. Tabbed interface: every document lives in one window, like Word with tabs.",
+        "caveats": "Shows ads and nudges you toward a subscription; after installing, check that no extra cloud account got switched on."
+      }
     },
     {
       "id": "SoftMaker.FreeOffice.2024",
       "name": "SoftMaker FreeOffice 2024",
       "category": "office",
-      "replaces": "Word (TextMaker), Excel (PlanMaker), PowerPoint (Presentations)",
       "formats": [".docx", ".xlsx", ".pptx", ".doc", ".xls", ".ppt"],
       "fidelity": 4,
-      "license": "Бесплатно для личного использования",
-      "summary": "Очень быстрая офлайн-работа с MS-форматами, переключаемый интерфейс Ribbon/классическое меню, отличное сохранение форматирования и диаграмм.",
-      "caveats": "Для коммерческого использования нужна платная версия. Макросы VBA читаются, но не исполняются."
+      "ru": {
+        "replaces": "Word (TextMaker), Excel (PlanMaker), PowerPoint (Presentations)",
+        "license": "Бесплатно для личного использования",
+        "summary": "Очень быстрая офлайн-работа с MS-форматами, переключаемый интерфейс Ribbon/классическое меню, отличное сохранение форматирования и диаграмм.",
+        "caveats": "Для коммерческого использования нужна платная версия. Макросы VBA читаются, но не исполняются."
+      },
+      "en": {
+        "replaces": "Word (TextMaker), Excel (PlanMaker), PowerPoint (Presentations)",
+        "license": "Free for private use",
+        "summary": "Very fast offline handling of Microsoft formats, a switchable Ribbon/classic-menu interface, and formatting and charts come through well.",
+        "caveats": "Commercial use requires a paid edition. VBA macros are readable but do not run."
+      }
     },
     {
       "id": "TheDocumentFoundation.LibreOffice",
       "name": "LibreOffice",
       "category": "office",
-      "replaces": "Word, Excel, PowerPoint, Access, Publisher, Visio (Basic Shapes)",
       "formats": [".docx", ".xlsx", ".pptx", ".doc", ".xls", ".ppt", ".odt", ".ods", ".odp", ".csv", ".rtf"],
       "fidelity": 4,
-      "license": "MPL-2.0, полностью бесплатен, без ограничений",
-      "summary": "Самый полный бесплатный офис: 7 приложений (Writer, Calc, Impress, Base, Draw, Math, Start). По умолчанию сохраняет в ODF, но .docx/.xlsx/.pptx читает и пишет; можно сделать MS-формат форматом по умолчанию. Есть вкладочный интерфейс и встроенные макросы Basic.",
-      "caveats": "Сложные документы Word (текстовые поля, перекрёстные ссылки, чужие макросы VBA) иногда съезжают. При первом запуске выберите «Использовать как в MS Office» в настройках интерфейса."
+      "ru": {
+        "replaces": "Word, Excel, PowerPoint, Access, Publisher, Visio (Basic Shapes)",
+        "license": "MPL-2.0, полностью бесплатен, без ограничений",
+        "summary": "Самый полный бесплатный офис: 7 приложений (Writer, Calc, Impress, Base, Draw, Math, Start). По умолчанию сохраняет в ODF, но .docx/.xlsx/.pptx читает и пишет; можно сделать MS-формат форматом по умолчанию. Есть вкладочный интерфейс и встроенные макросы Basic.",
+        "caveats": "Сложные документы Word (текстовые поля, перекрёстные ссылки, чужие макросы VBA) иногда съезжают. При первом запуске выберите знакомый интерфейс в настройках."
+      },
+      "en": {
+        "replaces": "Word, Excel, PowerPoint, Access, Publisher, Visio (basic shapes)",
+        "license": "MPL-2.0, completely free, no feature limits",
+        "summary": "The most complete free suite: 7 apps (Writer, Calc, Impress, Base, Draw, Math, Start). It saves as ODF by default but reads and writes .docx/.xlsx/.pptx, and Microsoft formats can be made the default. Tabbed interface and built-in Basic macros included.",
+        "caveats": "Complex Word documents (form fields, cross-references, foreign VBA macros) can shift. Pick your familiar UI in the settings on first run."
+      }
     },
     {
       "id": "LyX.LyX",
       "name": "LyX",
       "category": "docs",
-      "replaces": "Word для научных и книжных текстов",
       "formats": [".lyx", ".docx", ".pdf", ".tex", ".odt", ".html"],
       "fidelity": 2,
-      "license": "GPL-2.0+",
-      "summary": "Документ сформулирован как «LaTeX для людей»: формулы, сноски, библиография, перекрёстные ссылки и оглавление работают надёжнее, чем в Word. Экспорт в PDF, .docx, LaTeX.",
-      "caveats": "Подходит для текстов с формулами, а не для деловых документов с плавающей вёрсткой."
+      "ru": {
+        "replaces": "Word для научных и книжных текстов",
+        "license": "GPL-2.0+",
+        "summary": "Документ, сформулированный как «LaTeX для людей»: формулы, сноски, библиография, перекрёстные ссылки и оглавление работают надёжнее, чем в Word. Экспорт в PDF, .docx, LaTeX.",
+        "caveats": "Подходит для текстов с формулами, а не для деловых документов с плавающей вёрсткой."
+      },
+      "en": {
+        "replaces": "Word for academic and book manuscripts",
+        "license": "GPL-2.0+",
+        "summary": "Think of it as LaTeX with a human interface: formulas, footnotes, bibliography, cross-references and the table of contents behave more reliably than in Word. Exports to PDF, .docx and LaTeX.",
+        "caveats": "Good for formula-heavy writing, not for business documents with floating layout."
+      }
     },
     {
       "id": "DigitalScholar.Zotero",
       "name": "Zotero",
       "category": "docs",
-      "replaces": "Ссылки и библиография в Word",
       "formats": [".bib", ".ris", ".csl", ".pdf"],
       "fidelity": 3,
-      "license": "AGPL-3.0, 300 МБ облака бесплатно",
-      "summary": "Менеджер источников: собирает статьи и книги из браузера, расставляет ссылки и список литературы прямо в LibreOffice/Word по тысячам журнальных стилей.",
-      "caveats": null
+      "ru": {
+        "replaces": "Ссылки и библиография в Word",
+        "license": "AGPL-3.0, 300 МБ облака бесплатно",
+        "summary": "Менеджер источников: собирает статьи и книги из браузера, расставляет ссылки и список литературы прямо в LibreOffice/Word по тысячам журнальных стилей.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Citations and bibliography in Word",
+        "license": "AGPL-3.0, 300 MB of cloud storage free",
+        "summary": "A reference manager: it collects papers and books from the browser and inserts citations and bibliographies straight into LibreOffice or Word, using thousands of journal styles.",
+        "caveats": ""
+      }
     },
     {
       "id": "calibre.calibre",
       "name": "calibre",
       "category": "docs",
-      "replaces": "Чтение и конвертация э-книг",
       "formats": [".epub", ".mobi", ".azw3", ".pdf", ".docx", ".fb2"],
       "fidelity": 2,
-      "license": "GPL-3.0",
-      "summary": "Библиотека э-книг: конвертация между форматами, метаданные, обложки, синхронизация с читалками.",
-      "caveats": null
+      "ru": {
+        "replaces": "Чтение и конвертация э-книг",
+        "license": "GPL-3.0",
+        "summary": "Библиотека э-книг: конвертация между форматами, метаданные, обложки, синхронизация с читалками.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "E-book reading and conversion",
+        "license": "GPL-3.0",
+        "summary": "An e-book library: converts between formats, manages metadata and covers, syncs with e-readers.",
+        "caveats": ""
+      }
     },
     {
       "id": "Joplin.Joplin",
       "name": "Joplin",
       "category": "notes",
-      "replaces": "OneNote",
-      "formats": [".md", ".html", ".jpex (импорт/экспорт OneNote)"],
+      "formats": [".md", ".html", ".jex"],
       "fidelity": 4,
-      "license": "AGPL-3.0",
-      "summary": "Блоковые заметки, вложения, веб-клипер, шифрование, импорт из OneNote; синхронизация через свой Nextcloud/Dropbox/WebDAV без подписки.",
-      "caveats": null
+      "ru": {
+        "replaces": "OneNote",
+        "license": "AGPL-3.0",
+        "summary": "Блочные заметки, вложения, веб-клипер, шифрование, импорт из OneNote; синхронизация через свой Nextcloud/Dropbox/WebDAV без подписки.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "OneNote",
+        "license": "AGPL-3.0",
+        "summary": "Notebooks with attachments, a web clipper, end-to-end encryption and OneNote import; sync through your own Nextcloud, Dropbox or WebDAV without a subscription.",
+        "caveats": ""
+      }
     },
     {
       "id": "Obsidian.Obsidian",
       "name": "Obsidian",
       "category": "notes",
-      "replaces": "OneNote / личные базы знаний",
       "formats": [".md"],
       "fidelity": 3,
-      "license": "Бесплатно для личного и рабочего использования",
-      "summary": "Все заметки — обычные .md-файлы в папке: остаются вашими, открываются любым редактором, легко мигрируют. Связи между заметками, граф, плагины.",
-      "caveats": "Синхронизация между устройствами — платная или через свой диск."
+      "ru": {
+        "replaces": "OneNote / личные базы знаний",
+        "license": "Бесплатно для личного и рабочего использования",
+        "summary": "Все заметки — обычные .md-файлы в папке: остаются вашими, открываются любым редактором, легко мигрируют. Связи между заметками, граф, плагины.",
+        "caveats": "Синхронизация между устройствами — платная или через свой диск."
+      },
+      "en": {
+        "replaces": "OneNote / personal knowledge base",
+        "license": "Free for personal and commercial use",
+        "summary": "Every note is a plain .md file in a folder: it stays yours, opens in any editor and migrates easily. Backlinks, a graph view and a large plugin ecosystem.",
+        "caveats": "Cross-device sync is paid, or done through your own drive."
+      }
     },
     {
       "id": "Logseq.Logseq",
       "name": "Logseq",
       "category": "notes",
-      "replaces": "OneNote / ежедневник",
       "formats": [".md", ".org"],
       "fidelity": 3,
-      "license": "AGPL-3.0",
-      "summary": "Outliner: заметки как список пунктов, дневник-страница на каждый день, запросы по тегам и задачам.",
-      "caveats": null
+      "ru": {
+        "replaces": "OneNote / ежедневник",
+        "license": "AGPL-3.0",
+        "summary": "Аутлайнер: заметки как список пунктов, дневник-страница на каждый день, запросы по тегам и задачам.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "OneNote / daily journal",
+        "license": "AGPL-3.0",
+        "summary": "An outliner: notes as bullet blocks, a journal page for every day, and queries across tags and tasks.",
+        "caveats": ""
+      }
     },
     {
       "id": "Xournal++.Xournal++",
       "name": "Xournal++",
       "category": "notes",
-      "replaces": "OneNote (рукописный ввод, планшеты)",
       "formats": [".xopp", ".pdf", ".svg", ".png"],
       "fidelity": 3,
-      "license": "GPL-2.0+",
-      "summary": "Письмо стилусом/пальцем поверх PDF, рукописные конспекты, экспорт в PDF с аннотациями.",
-      "caveats": null
+      "ru": {
+        "replaces": "OneNote (рукописный ввод, планшеты)",
+        "license": "GPL-2.0+",
+        "summary": "Письмо стилусом или пальцем поверх PDF, рукописные конспекты, экспорт в PDF с аннотациями.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "OneNote (handwriting, tablets)",
+        "license": "GPL-2.0+",
+        "summary": "Write with a stylus or finger on top of a PDF, take handwritten notes, export annotated PDFs.",
+        "caveats": ""
+      }
     },
     {
       "id": "geeksoftwareGmbH.PDF24Creator",
       "name": "PDF24 Creator",
       "category": "pdf",
-      "replaces": "Acrobat / «Печать в PDF» с обработкой",
       "formats": [".pdf", ".docx", ".xlsx", ".jpg", ".png"],
       "fidelity": 4,
-      "license": "Бесплатно, офлайн-версия без отправки данных на сервер",
-      "summary": "Сборка, разделение, сжатие, поворот, извлечение страниц и текста, объединение разных документов в один PDF, водяные знаки и пароли.",
-      "caveats": null
+      "ru": {
+        "replaces": "Acrobat / «Печать в PDF» с обработкой",
+        "license": "Бесплатно, офлайн-версия без отправки данных на сервер",
+        "summary": "Сборка, разделение, сжатие, поворот, извлечение страниц и текста, объединение разных документов в один PDF, водяные знаки и пароли.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Acrobat / printing to PDF with post-processing",
+        "license": "Free; the offline version sends nothing to a server",
+        "summary": "Merge, split, compress, rotate, extract pages and text, combine different documents into one PDF, add watermarks and passwords.",
+        "caveats": ""
+      }
     },
     {
       "id": "SumatraPDF.SumatraPDF",
       "name": "Sumatra PDF",
       "category": "pdf",
-      "replaces": "Быстрый просмотр PDF/ebook",
       "formats": [".pdf", ".epub", ".mobi", ".cbz", ".xps", ".djvu"],
       "fidelity": 3,
-      "license": "GPL-3.0",
-      "summary": "Открывает документ на сотни страниц почти мгновенно; минимум интерфейса, портативная версия.",
-      "caveats": "Только чтение, редактировать нельзя."
+      "ru": {
+        "replaces": "Быстрый просмотр PDF и э-книг",
+        "license": "GPL-3.0",
+        "summary": "Открывает документ на сотни страниц почти мгновенно; минимум интерфейса, есть портативная версия.",
+        "caveats": "Только чтение, редактировать нельзя."
+      },
+      "en": {
+        "replaces": "Fast PDF and e-book viewing",
+        "license": "GPL-3.0",
+        "summary": "Opens a several-hundred-page document almost instantly, with almost no interface. A portable build exists.",
+        "caveats": "Read-only; it cannot edit documents."
+      }
     },
     {
       "id": "JGraph.Draw",
       "name": "draw.io (diagrams.net)",
       "category": "visual",
-      "replaces": "Visio",
       "formats": [".drawio", ".xml", ".png", ".svg", ".pdf", ".vsdx"],
       "fidelity": 4,
-      "license": "Apache-2.0",
-      "summary": "Блок-схемы, архитектурные и сетевые диаграммы; импорт/экспорт .vsdx (файлы Visio), хранение прямо в обычном файле.",
-      "caveats": null
+      "ru": {
+        "replaces": "Visio",
+        "license": "Apache-2.0",
+        "summary": "Блок-схемы, архитектурные и сетевые диаграммы; импорт и экспорт .vsdx (файлы Visio), хранение прямо в обычном файле.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Visio",
+        "license": "Apache-2.0",
+        "summary": "Flowcharts, architecture and network diagrams; imports and exports .vsdx (Visio files) and keeps everything in a plain file.",
+        "caveats": ""
+      }
     },
     {
       "id": "Inkscape.Inkscape",
       "name": "Inkscape",
       "category": "visual",
-      "replaces": "Visio / Illustrator",
       "formats": [".svg", ".pdf", ".eps", ".png", ".wmf", ".emf"],
       "fidelity": 3,
-      "license": "GPL-3.0",
-      "summary": "Векторный редактор: логотипы, плакаты, схемы; импорт WMF/EMF — то, что в Word вставляют как «фигуры».",
-      "caveats": null
+      "ru": {
+        "replaces": "Visio / Illustrator",
+        "license": "GPL-3.0",
+        "summary": "Векторный редактор: логотипы, плакаты, схемы; импорт WMF/EMF — то, что в Word вставляют как «фигуры».",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Visio / Illustrator",
+        "license": "GPL-3.0",
+        "summary": "A vector editor for logos, posters and diagrams; imports WMF/EMF, the clip-art format Word documents use.",
+        "caveats": ""
+      }
     },
     {
       "id": "Scribus.Scribus",
       "name": "Scribus",
       "category": "visual",
-      "replaces": "Publisher",
       "formats": [".sla", ".pdf", ".svg", ".tiff"],
       "fidelity": 3,
-      "license": "GPL-2.0+",
-      "summary": "Долго-документная вёрстка: буклеты, журналы, книги, CMYK и вылеты под типографию, экспорт в PDF/X.",
-      "caveats": null
+      "ru": {
+        "replaces": "Publisher",
+        "license": "GPL-2.0+",
+        "summary": "Долгая документная вёрстка: буклеты, журналы, книги, CMYK и вылеты под типографию, экспорт в PDF/X.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Publisher",
+        "license": "GPL-2.0+",
+        "summary": "Desktop publishing for booklets, magazines and books: CMYK and bleed for print shops, PDF/X export.",
+        "caveats": ""
+      }
     },
     {
       "id": "Freeplane.Freeplane",
       "name": "Freeplane",
       "category": "visual",
-      "replaces": "OneNote / интеллект-карты",
       "formats": [".mm", ".xml", ".pdf", ".png", ".txt"],
       "fidelity": 2,
-      "license": "GPL-2.0+",
-      "summary": "Интеллект-карты для планирования текста и проектов, экспорт в HTML/PDF.",
-      "caveats": null
+      "ru": {
+        "replaces": "OneNote / интеллект-карты",
+        "license": "GPL-2.0+",
+        "summary": "Интеллект-карты для планирования текста и проектов, экспорт в HTML и PDF.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "OneNote / mind mapping",
+        "license": "GPL-2.0+",
+        "summary": "Mind maps for planning documents and projects, with HTML and PDF export.",
+        "caveats": ""
+      }
     },
     {
       "id": "Mozilla.Thunderbird",
       "name": "Thunderbird",
       "category": "mail",
-      "replaces": "Outlook (почта, календарь, контакты)",
-      "formats": [".mbox", ".eml", ".ics", ".vcf", ".pst (через импорт)"],
+      "formats": [".mbox", ".eml", ".ics", ".vcf", ".pst"],
       "fidelity": 4,
-      "license": "MPL-2.0",
-      "summary": "Несколько аккаунтов (IMAP/JExchange через плагин), календарь и задачи, фильтры, подписки, шифрование писем.",
-      "caveats": "Для Exchange-аккаунтов организации нужен дополнительный модуль."
+      "ru": {
+        "replaces": "Outlook (почта, календарь, контакты)",
+        "license": "MPL-2.0",
+        "summary": "Несколько аккаунтов (IMAP и Exchange через плагин), календарь и задачи, фильтры, подписки, шифрование писем.",
+        "caveats": "Для Exchange-аккаунтов организации нужен дополнительный модуль."
+      },
+      "en": {
+        "replaces": "Outlook (mail, calendar, contacts)",
+        "license": "MPL-2.0",
+        "summary": "Multiple accounts (IMAP, and Exchange through an add-on), calendar and tasks, message filters, feeds and encrypted mail.",
+        "caveats": "Work Exchange accounts need an extra module."
+      }
     },
     {
       "id": "DBeaver.DBeaver.Community",
       "name": "DBeaver Community",
       "category": "mail",
-      "replaces": "Access (работа с базами данных)",
       "formats": [".sql", ".csv", ".xlsx", ".json"],
       "fidelity": 3,
-      "license": "Apache-2.0",
-      "summary": "Один клиент к SQLite, PostgreSQL, MySQL, MS SQL, Oracle: таблицы, запросы, импорт/экспорт данных в .xlsx и .csv.",
-      "caveats": null
+      "ru": {
+        "replaces": "Access (работа с базами данных)",
+        "license": "Apache-2.0",
+        "summary": "Один клиент к SQLite, PostgreSQL, MySQL, MS SQL, Oracle: таблицы, запросы, импорт и экспорт данных в .xlsx и .csv.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Access (working with databases)",
+        "license": "Apache-2.0",
+        "summary": "One client for SQLite, PostgreSQL, MySQL, MS SQL and Oracle: browse tables, write queries, import and export to .xlsx and .csv.",
+        "caveats": ""
+      }
     },
     {
       "id": "Nextcloud.NextcloudDesktop",
       "name": "Nextcloud Desktop",
       "category": "cloud",
-      "replaces": "OneDrive",
-      "formats": ["любые файлы (синхронизация папок)"],
+      "formats": ["folders"],
       "fidelity": 4,
-      "license": "GPL-2.0, клиент бесплатен",
-      "summary": "Синхронизация папок с сервером и ссылки-директории; работает и с чужим хостингом, и с собственным сервером дома.",
-      "caveats": "Нужен сервер Nextcloud (свой или у провайдера) — бесплатного публичного хранилища у клиента нет."
+      "ru": {
+        "replaces": "OneDrive",
+        "license": "GPL-2.0, клиент бесплатен",
+        "summary": "Синхронизация папок с сервером и ссылки-директории; работает и с чужим хостингом, и с собственным сервером дома.",
+        "caveats": "Нужен сервер Nextcloud (свой или у провайдера) — бесплатного публичного хранилища у клиента нет."
+      },
+      "en": {
+        "replaces": "OneDrive",
+        "license": "GPL-2.0, the client is free",
+        "summary": "Folder sync and virtual directories; works against a hosted provider or your own server at home.",
+        "caveats": "You need a Nextcloud server (your own or a provider) — the client ships with no free public storage."
+      }
     },
     {
       "id": "Seafile.Seafile",
       "name": "Seafile Client",
       "category": "cloud",
-      "replaces": "OneDrive / корпоративный диск",
-      "formats": ["любые файлы (синхронизация библиотек)"],
+      "formats": ["libraries"],
       "fidelity": 3,
-      "license": "AGPL-3.0",
-      "summary": "Синхронизация с историей версий по каждой библиотеке и шифрованием; легче держит большие папки, чем обычная сетевая папка.",
-      "caveats": "Как и Nextcloud — требует свой сервер."
+      "ru": {
+        "replaces": "OneDrive / корпоративный диск",
+        "license": "AGPL-3.0",
+        "summary": "Синхронизация с историей версий по каждой библиотеке и шифрованием; легче держит большие папки, чем обычная сетевая папка.",
+        "caveats": "Как и Nextcloud — требует свой сервер."
+      },
+      "en": {
+        "replaces": "OneDrive / a company drive",
+        "license": "AGPL-3.0",
+        "summary": "Sync with per-library version history and encryption; handles large folders better than a mapped network drive.",
+        "caveats": "Like Nextcloud, it needs a server of its own."
+      }
     },
     {
       "id": "GIMP.GIMP",
       "name": "GIMP",
       "category": "system",
-      "replaces": "Paint / Photoshop (растровая обработка)",
       "formats": [".xcf", ".png", ".jpg", ".tiff", ".pdf", ".psd"],
       "fidelity": 2,
-      "license": "GPL-3.0+",
-      "summary": "Слои, маски, цветокоррекция, пакетная обработка, скрипты; открывает .psd.",
-      "caveats": null
+      "ru": {
+        "replaces": "Paint / Photoshop (растровая обработка)",
+        "license": "GPL-3.0+",
+        "summary": "Слои, маски, цветокоррекция, пакетная обработка, скрипты; открывает .psd.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Paint / Photoshop (raster editing)",
+        "license": "GPL-3.0+",
+        "summary": "Layers, masks, colour correction, batch processing and scripting; opens .psd files.",
+        "caveats": ""
+      }
     },
     {
       "id": "dotPDN.PaintDotNet",
       "name": "paint.net",
       "category": "system",
-      "replaces": "Paint (но со слоями)",
       "formats": [".pdn", ".png", ".jpg", ".bmp", ".tiff"],
       "fidelity": 3,
-      "license": "Бесплатно (собственническая лицензия)",
-      "summary": "Простой и быстрый растровый редактор со слоями и эффектами — самый близкий к «доросшему Paint» вариант.",
-      "caveats": null
+      "ru": {
+        "replaces": "Paint (но со слоями)",
+        "license": "Бесплатно (собственническая лицензия)",
+        "summary": "Простой и быстрый растровый редактор со слоями и эффектами — самый близкий к «доросшему Paint» вариант.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Paint, but with layers",
+        "license": "Free (proprietary license)",
+        "summary": "A fast, simple raster editor with layers and effects — the closest thing to Paint that grew up.",
+        "caveats": ""
+      }
     },
     {
       "id": "VideoLAN.VLC",
       "name": "VLC",
       "category": "system",
-      "replaces": "Media Player / Movies & TV",
       "formats": [".mp4", ".mkv", ".avi", ".mp3", ".flac", ".ts"],
       "fidelity": 3,
-      "license": "GPL-2.0+",
-      "summary": "Играет почти всё без поиска кодеков; сетевые потоки, запись экрана, конвертация.",
-      "caveats": null
+      "ru": {
+        "replaces": "Media Player / Movies & TV",
+        "license": "GPL-2.0+",
+        "summary": "Играет почти всё без поиска кодеков; сетевые потоки, запись экрана, конвертация.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Media Player / Movies & TV",
+        "license": "GPL-2.0+",
+        "summary": "Plays almost anything without hunting for codecs; network streams, screen recording and conversion.",
+        "caveats": ""
+      }
     },
     {
       "id": "7zip.7zip",
       "name": "7-Zip",
       "category": "system",
-      "replaces": "WinRAR / встроенные архивы",
       "formats": [".7z", ".zip", ".rar", ".tar", ".gz", ".iso"],
       "fidelity": 4,
-      "license": "LGPL-2.1+",
-      "summary": "Максимальное сжатие, шифрование AES-256, контекстное меню в проводнике, открывает .zipx и образы .iso.",
-      "caveats": null
+      "ru": {
+        "replaces": "WinRAR / встроенные архивы",
+        "license": "LGPL-2.1+",
+        "summary": "Максимальное сжатие, шифрование AES-256, контекстное меню в проводнике, открывает .zipx и образы .iso.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "WinRAR / the built-in archive support",
+        "license": "LGPL-2.1+",
+        "summary": "Strongest compression, AES-256 encryption, a File Explorer context menu, and it opens .zipx and .iso images.",
+        "caveats": ""
+      }
     },
     {
       "id": "Giorgiotani.Peazip",
       "name": "PeaZip",
       "category": "system",
-      "replaces": "WinRAR (интерфейс богаче)",
       "formats": [".zip", ".7z", ".rar", ".tar", ".alz", ".deb"],
       "fidelity": 3,
-      "license": "LGPL-3.0",
-      "summary": "Проводник архивов, генератор паролей, двухфакторные хранилища, больше форматов из коробки.",
-      "caveats": null
+      "ru": {
+        "replaces": "WinRAR (интерфейс богаче)",
+        "license": "LGPL-3.0",
+        "summary": "Проводник архивов, генератор паролей, двухфакторные хранилища, больше форматов из коробки.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "WinRAR (with a fuller interface)",
+        "license": "LGPL-3.0",
+        "summary": "An archive browser with a password generator, two-factor vaults and more formats supported out of the box.",
+        "caveats": ""
+      }
     },
     {
       "id": "AutoHotkey.AutoHotkey",
       "name": "AutoHotkey",
       "category": "system",
-      "replaces": "Power Automate Desktop (макросы клавиш)",
       "formats": [".ahk"],
       "fidelity": 3,
-      "license": "GPL-2.0+",
-      "summary": "Горячие клавиши, автотекст (автозамена опечаток и шаблонных фраз в Word), переназначение кнопок, скрипты для повторяющихся действий.",
-      "caveats": null
+      "ru": {
+        "replaces": "Power Automate Desktop (макросы клавиш)",
+        "license": "GPL-2.0+",
+        "summary": "Горячие клавиши, автотекст (автозамена опечаток и шаблонных фраз в Word), переназначение кнопок, скрипты для повторяющихся действий.",
+        "caveats": ""
+      },
+      "en": {
+        "replaces": "Power Automate Desktop (keyboard macros)",
+        "license": "GPL-2.0+",
+        "summary": "Hotkeys, auto-text that expands typos and boilerplate while you type in Word, key remapping and scripts for repetitive actions.",
+        "caveats": ""
+      }
     }
   ],
   "official": [
     {
-      "name": "Office на web — настоящий Word, Excel и PowerPoint бесплатно",
       "url": "https://www.office.com",
-      "summary": "Официальный бесплатный веб-Office от Microsoft: те же Word, Excel и PowerPoint, родные .docx/.xlsx/.pptx, файлы в OneDrive (5 ГБ бесплатно). Нужен любой аккаунт Microsoft, платить не за что.",
-      "caveats": "Урезано против десктопа: нет макросов VBA, Power Pivot и части тяжёлых надстроек; для очень больших документов веб-версия медленнее."
+      "ru": {
+        "name": "Office на web — настоящий Word, Excel и PowerPoint бесплатно",
+        "summary": "Официальный бесплатный веб-Office от Microsoft: те же Word, Excel и PowerPoint, родные .docx/.xlsx/.pptx, файлы в OneDrive (5 ГБ бесплатно). Нужен любой аккаунт Microsoft, платить не за что.",
+        "caveats": "Урезано против десктопа: нет макросов VBA, Power Pivot и части тяжёлых надстроек; для очень больших документов веб-версия медленнее."
+      },
+      "en": {
+        "name": "Office on the web — real Word, Excel and PowerPoint for free",
+        "summary": "Microsoft's own free web Office: the same Word, Excel and PowerPoint, native .docx/.xlsx/.pptx, files stored in OneDrive (5 GB free). Any Microsoft account works; nothing to pay for.",
+        "caveats": "Reduced against the desktop: no VBA macros, no Power Pivot and some heavy add-ins; very large documents are slower in the browser."
+      }
     },
     {
-      "name": "Учебная или рабочая лицензия Microsoft 365",
       "url": "https://portal.office.com",
-      "summary": "Если есть почта вуза, колледжа или работодателя — проверьте, положен ли вам Microsoft 365: во многих учебных заведениях он выдаётся бесплатно и в полном объёме, включая десктопный Office на несколько устройств.",
-      "caveats": "Зависит от того, что купило учебное заведение: где-то доступна только веб-версия. Лицензия привязана к аккаунту и перестаёт действовать после отчисления или увольнения."
+      "ru": {
+        "name": "Учебная или рабочая лицензия Microsoft 365",
+        "summary": "Если есть почта вуза, колледжа или работодателя — проверьте, положен ли вам Microsoft 365: во многих учебных заведениях он выдаётся бесплатно и в полном объёме, включая десктопный Office на несколько устройств.",
+        "caveats": "Зависит от того, что купило учебное заведение: где-то доступна только веб-версия. Лицензия привязана к аккаунту и перестаёт действовать после отчисления или увольнения."
+      },
+      "en": {
+        "name": "A school or work Microsoft 365 licence",
+        "summary": "If you have a university, college or employer email, check whether Microsoft 365 is already yours: many schools hand it out free and in full, including desktop Office on several devices.",
+        "caveats": "Depends on what the institution bought — some only get the web version. The licence is tied to that account and ends when you leave."
+      }
     },
     {
-      "name": "Поставить веб-Office как приложение (PWA)",
       "url": "",
-      "summary": "Чтобы Word не выглядел вкладкой: откройте office.com в Microsoft Edge, войдите в аккаунт, затем «… → Приложения → Установить эти приложения как сайты» (или значок установки в адресной строке). Появится отдельное окно, иконка на рабочем столе и запись в «Приложениях и возможностях» — удаляется так же, как обычная программа.",
-      "caveats": "Это та же веб-версия, просто в своём окне: офлайн-режим и макросы не появляются."
+      "ru": {
+        "name": "Поставить веб-Office как приложение (PWA)",
+        "summary": "Чтобы Word не выглядел вкладкой: откройте office.com в Microsoft Edge, войдите в аккаунт, затем «… → Приложения → Установить эти приложения как сайты» (или значок установки в адресной строке). Появится отдельное окно, иконка на рабочем столе и запись в «Приложениях и возможностях» — удаляется так же, как обычная программа.",
+        "caveats": "Это та же веб-версия, просто в своём окне: офлайн-режим и макросы не появляются."
+      },
+      "en": {
+        "name": "Install web Office as an app (PWA)",
+        "summary": "So Word stops looking like a tab: open office.com in Microsoft Edge, sign in, then \"… → Apps → Install this site as an app\" (or the install icon in the address bar). You get its own window, a desktop icon and an entry under Installed apps, removable like any program.",
+        "caveats": "It is still the web version in its own window: no offline mode and no macros appear."
+      }
     }
   ]
 }

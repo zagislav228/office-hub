@@ -22,6 +22,9 @@
   .brand { padding: 18px 18px 12px; }
   .brand h1 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: .2px; }
   .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12.5px; }
+  .lang { display: flex; gap: 6px; padding: 0 14px 10px; }
+  .lang button { flex: 1; background: var(--raise); border: 1px solid var(--line); color: var(--muted); padding: 5px 0; border-radius: 8px; font-size: 12px; cursor: pointer; letter-spacing: .04em; }
+  .lang button.on { border-color: var(--accent); color: #e7e4f4; background: #1b2a3f; }
   .search { padding: 0 14px 12px; }
   .search input {
     width: 100%; background: var(--raise); border: 1px solid var(--line); color: var(--text);
@@ -144,21 +147,24 @@
   <aside>
     <div class="brand">
       <h1>Office Hub</h1>
-      <p>Бесплатные замены Microsoft Office</p>
+      <p id="tagline"></p>
     </div>
-    <div class="search"><input id="q" type="search" placeholder="Поиск: docx, таблица, почта…"></div>
+    <div class="lang" id="lang">
+      <button data-lang="ru">RU</button><button data-lang="en">EN</button>
+    </div>
+    <div class="search"><input id="q" type="search"></div>
     <nav id="nav"></nav>
     <div class="sidefoot">
       <div class="loc">
-        <label class="switch"><input type="checkbox" id="useLoc"> Ставить в выбранную папку</label>
+        <label class="switch"><input type="checkbox" id="useLoc"> <span id="tUseLoc"></span></label>
         <div class="locrow">
           <input id="loc" type="text" spellcheck="false" placeholder="D:\Programs">
-          <button class="btn" id="browse" title="Выбрать папку в проводнике">Обзор</button>
+          <button class="btn" id="browse"></button>
         </div>
         <div class="chips" id="locChips"></div>
-        <div class="note">Умеют не все пакеты: если инсталлер не поддерживает свою папку, winget поставит программу по умолчанию и напишет об этом в панели вывода.</div>
+        <div class="note" id="locNote"></div>
       </div>
-      <label class="switch"><input type="checkbox" id="silent"> Тихая установка (без окон)</label>
+      <label class="switch"><input type="checkbox" id="silent"> <span id="tSilent"></span></label>
       <div class="note" id="wingetNote"></div>
     </div>
   </aside>
@@ -166,28 +172,20 @@
   <main>
     <div class="topbar">
       <div>
-        <div class="title" id="viewTitle">Все программы</div>
+        <div class="title" id="viewTitle"></div>
         <div class="count" id="viewCount"></div>
       </div>
       <div class="spacer"></div>
       <div class="status" id="status"></div>
       <select id="sort">
-        <option value="fidelity">Сначала похожие на MS Office</option>
-        <option value="name">По названию</option>
+        <option value="fidelity"></option>
+        <option value="name"></option>
       </select>
     </div>
     <div class="scroll">
-      <details class="details">
-        <summary>Форматы .docx, .xlsx, .pptx и что умеют бесплатные офисы</summary>
-        <div style="margin-top:10px">
-          Все четыре офисных пакета читают и пишут <b>.docx / .xlsx / .pptx</b> — это открытая спецификация ECMA-376.
-          Максимально точно верстку сохраняют <b>ONLYOFFICE</b> и <b>WPS Office</b> (для них это родной формат),
-          затем <b>FreeOffice</b> и <b>LibreOffice</b> (хранит по умолчанию в .odt/.ods/.odp, формат MS включается настройкой).
-          Хуже всего переносятся макросы VBA, поля форм Word и сквозные нумерации.
-          <br><br>
-          Windows 11 не позволяет программе молча назначить редактор по умолчанию для расширения — сделать это нужно один раз руками:
-          <a href="ms-settings:defaultapps" target="_blank" rel="noopener">Параметры → Приложения по умолчанию</a>.
-        </div>
+      <details class="details" id="details">
+        <summary id="tDetails"></summary>
+        <div class="dbody" id="detailsBody"></div>
       </details>
       <div id="list"></div>
     </div>
@@ -196,21 +194,126 @@
 
 <div class="plan" id="plan">
   <span id="planCount" class="muted"></span>
-  <button class="btn go" id="planRun">Установить выбранное</button>
-  <button class="btn ghost" id="planClear">Сбросить</button>
+  <button class="btn go" id="planRun"></button>
+  <button class="btn ghost" id="planClear"></button>
 </div>
 
 <div class="jobs off hide" id="jobsBox">
   <div class="jh" id="jobsHead">
-    Установка <span class="badge" id="jobsBadge">0</span>
+    <span id="tJobs"></span> <span class="badge" id="jobsBadge"></span>
     <span class="spacer" style="flex:1"></span>
-    <span class="muted" id="jobsToggle" style="font-size:12px">свернуть/развернуть</span>
+    <span class="muted" id="jobsToggle" style="font-size:12px"></span>
   </div>
   <div class="jb" id="jobs"></div>
 </div>
 
 <script>
-const st = { data: null, q: '', cat: 'all', sort: 'fidelity', plan: new Set(), jobs: [] };
+const STR = {
+  ru: {
+    tagline: 'Бесплатные замены Microsoft Office',
+    search: 'Поиск: docx, таблица, почта…',
+    all: 'Все программы',
+    sortFidelity: 'Сначала похожие на MS Office',
+    sortName: 'По названию',
+    details: 'Форматы .docx, .xlsx, .pptx и что умеют бесплатные офисы',
+    detailsBody: 'Все четыре офисных пакета читают и пишут <b>.docx / .xlsx / .pptx</b> — это открытая спецификация ECMA-376. Максимально точно верстку сохраняют <b>ONLYOFFICE</b> и <b>WPS Office</b> (для них это родной формат), затем <b>FreeOffice</b> и <b>LibreOffice</b> (хранит по умолчанию в .odt/.ods/.odp, формат MS включается настройкой). Хуже всего переносятся макросы VBA, поля форм Word и сквозные нумерации.<br><br>Windows 11 не позволяет программе молча назначить редактор по умолчанию для расширения — сделать это нужно один раз руками: <a href="ms-settings:defaultapps" target="_blank" rel="noopener">Параметры → Приложения по умолчанию</a>. Язык самой программы выбирает её установщик: LibreOffice спрашивает при установке, остальные берут язык Windows.',
+    useLoc: 'Ставить в выбранную папку',
+    browse: 'Обзор',
+    locNote: 'Умеют не все пакеты: если инсталлер не поддерживает свою папку, winget поставит программу по умолчанию и напишет об этом в панели вывода.',
+    silent: 'Тихая установка (без окон)',
+    notInstalled: 'не установлено',
+    installed: 'установлено',
+    similarity: 'сходство с MS Office',
+    instead: 'Вместо:',
+    install: 'Установить',
+    update: 'Обновить',
+    installing: 'Устанавливается…',
+    plan: 'в план',
+    planCount: 'Выбрано:',
+    planRun: 'Установить выбранное',
+    planClear: 'Сбросить',
+    jobs: 'Установка',
+    jobsToggle: 'свернуть/развернуть',
+    jobsEmpty: 'Задач пока нет. Нажмите «Установить» на карточке.',
+    jobsRunning: 'выполняется',
+    jobsCount: 'задач',
+    logTitle: 'вывод winget',
+    logEmpty: '(пока пусто)',
+    installMode: 'установка',
+    upgradeMode: 'обновление',
+    cancel: 'Отменить',
+    officialTitle: 'Официальные способы получить Microsoft Office',
+    noInstall: 'без установки',
+    open: 'Открыть',
+    steps: 'шаги в описании',
+    of: 'из',
+    empty: 'Ничего не найдено — попробуйте другое слово.',
+    starting: 'Запускаю:',
+    started: 'задача запущена',
+    error: 'Ошибка:',
+    catalogError: 'Не удалось загрузить каталог:',
+    folderOpening: 'Открываю выбор папки — диалог может оказаться под окном',
+    folderPicked: 'Папка для установки:',
+    folderCanceled: 'Выбор папки отменён',
+    dryNote: 'dry: команды не выполняются ·',
+  },
+  en: {
+    tagline: 'Free replacements for Microsoft Office',
+    search: 'Search: docx, spreadsheet, mail…',
+    all: 'All programs',
+    sortFidelity: 'Most like MS Office first',
+    sortName: 'By name',
+    details: 'About .docx, .xlsx, .pptx and what the free suites do',
+    detailsBody: 'All four office suites read and write <b>.docx / .xlsx / .pptx</b> — the open ECMA-376 specification. <b>ONLYOFFICE</b> and <b>WPS Office</b> preserve layout most faithfully (it is their native format), then <b>FreeOffice</b> and <b>LibreOffice</b> (which stores as .odt/.ods/.odp by default; Microsoft formats are a setting). VBA macros, Word form fields and document-wide numbering survive the move worst.<br><br>Windows 11 does not let a program quietly make itself the default handler for an extension — that one choice is yours: <a href="ms-settings:defaultapps" target="_blank" rel="noopener">Settings → Default apps</a>. The language of the installed program is up to its own installer: LibreOffice asks during setup, the others follow the Windows display language.',
+    useLoc: 'Install into a chosen folder',
+    browse: 'Browse',
+    locNote: 'Not every package supports this: if the installer has no custom location, winget installs to its default place and says so in the output panel.',
+    silent: 'Silent install (no windows)',
+    notInstalled: 'not installed',
+    installed: 'installed',
+    similarity: 'similarity to MS Office',
+    instead: 'Replaces:',
+    install: 'Install',
+    update: 'Update',
+    installing: 'Installing…',
+    plan: 'to plan',
+    planCount: 'Selected:',
+    planRun: 'Install selected',
+    planClear: 'Clear',
+    jobs: 'Installation',
+    jobsToggle: 'collapse/expand',
+    jobsEmpty: 'No jobs yet. Press "Install" on a card.',
+    jobsRunning: 'running',
+    jobsCount: 'jobs',
+    logTitle: 'winget output',
+    logEmpty: '(empty for now)',
+    installMode: 'install',
+    upgradeMode: 'upgrade',
+    cancel: 'Cancel',
+    officialTitle: 'Official ways to get Microsoft Office',
+    noInstall: 'no install',
+    open: 'Open',
+    steps: 'steps above',
+    of: 'of',
+    empty: 'Nothing found — try another word.',
+    starting: 'Starting:',
+    started: 'job started',
+    error: 'Error:',
+    catalogError: 'Failed to load the catalog:',
+    folderOpening: 'Opening the folder dialog — it may end up behind the window',
+    folderPicked: 'Install folder:',
+    folderCanceled: 'Folder selection canceled',
+    dryNote: 'dry: commands are not run ·',
+  },
+};
+
+const st = {
+  data: null, q: '', cat: 'all', sort: 'fidelity', plan: new Set(), jobs: [],
+  lang: localStorage.getItem('officehub.lang') || (navigator.language.startsWith('ru') ? 'ru' : 'en'),
+};
+const T = () => STR[st.lang];
+const catTitle = (c) => (st.lang === 'ru' ? c.ru : c.en);
+const txt = (o) => (st.lang === 'ru' ? o.ru : o.en);
 const el = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -234,26 +337,28 @@ function dots(n) {
 }
 
 function card(a) {
+  const t = txt(a);
   const ver = st.data.installed[a.id];
   const busy = st.jobs.some((j) => j.appId === a.id && j.status === 'running');
+  const s = T();
   return `<article class="card${ver ? ' has' : ''}${busy ? ' busy' : ''}" data-id="${esc(a.id)}">
     <div class="r1">
       <div>
         <div class="nm">${esc(a.name)}</div>
-        <div class="rp">Вместо: ${esc(a.replaces)}</div>
+        <div class="rp">${s.instead} ${esc(t.replaces)}</div>
       </div>
-      <span class="pill ${ver ? 'has' : 'no'}">${ver ? '✓ ' + esc(ver) : 'не установлено'}</span>
+      <span class="pill ${ver ? 'has' : 'no'}">${ver ? '✓ ' + esc(ver) : s.notInstalled}</span>
     </div>
-    <div class="sim">${dots(a.fidelity)}<span>сходство с MS Office</span></div>
-    <div class="sm">${esc(a.summary)}</div>
-    ${a.caveats ? `<div class="cv">⚠ ${esc(a.caveats)}</div>` : ''}
-    <div class="li">${esc(a.license)}</div>
+    <div class="sim">${dots(a.fidelity)}<span>${s.similarity}</span></div>
+    <div class="sm">${esc(t.summary)}</div>
+    ${t.caveats ? `<div class="cv">⚠ ${esc(t.caveats)}</div>` : ''}
+    <div class="li">${esc(t.license)}</div>
     <div class="tags">${a.formats.map((f) => `<span class="tag${/\.(docx|xlsx|pptx|doc|xls|ppt)$/.test(f) ? ' ms' : ''}">${esc(f)}</span>`).join('')}</div>
     <div class="acts">
-      <label class="switch"><input type="checkbox" class="planbox" ${st.plan.has(a.id) ? 'checked' : ''}> в план</label>
+      <label class="switch"><input type="checkbox" class="planbox" ${st.plan.has(a.id) ? 'checked' : ''}> ${s.plan}</label>
       <span class="spacer"></span>
-      <button class="btn inst go" ${busy ? 'disabled' : ''}>${busy ? 'Устанавливается…' : 'Установить'}</button>
-      ${ver ? '<button class="btn upg">Обновить</button>' : ''}
+      <button class="btn inst go" ${busy ? 'disabled' : ''}>${busy ? s.installing : s.install}</button>
+      ${ver ? `<button class="btn upg">${s.update}</button>` : ''}
     </div>
   </article>`;
 }
@@ -262,31 +367,33 @@ function visible() {
   const q = st.q.trim().toLowerCase();
   return st.data.apps
     .filter((a) => st.cat === 'all' || a.category === st.cat)
-    .filter((a) => !q || [a.name, a.replaces, a.summary, a.license, a.replaces, a.formats.join(' ')].join(' ').toLowerCase().includes(q))
+    .filter((a) => !q || [a.name, txt(a).replaces, txt(a).summary, txt(a).license, a.formats.join(' ')].join(' ').toLowerCase().includes(q))
     .sort((x, y) => st.sort === 'name' ? x.name.localeCompare(y.name) : y.fidelity - x.fidelity);
 }
 
 function renderNav() {
-  const cats = [{ id: 'all', title: 'Все программы' }, ...st.data.categories];
+  const cats = [{ id: 'all', ru: T().all, en: T().all }, ...st.data.categories];
   el('#nav').innerHTML = cats.map((c) => {
     const n = c.id === 'all' ? st.data.apps.length : st.data.apps.filter((a) => a.category === c.id).length;
-    return `<button data-cat="${c.id}" class="${st.cat === c.id ? 'on' : ''}">${esc(c.title)}<span class="n">${n}</span></button>`;
+    return `<button data-cat="${c.id}" class="${st.cat === c.id ? 'on' : ''}">${esc(catTitle(c))}<span class="n">${n}</span></button>`;
   }).join('');
   el('#nav').querySelectorAll('button').forEach((b) => { b.onclick = () => { st.cat = b.dataset.cat; render(); }; });
 }
 
 function officialCards() {
+  const s = T();
   return (st.data.official || []).map((o) => `<article class="card">
-    <div class="r1"><div class="nm">${esc(o.name)}</div><span class="pill off">без установки</span></div>
-    <div class="sm">${esc(o.summary)}</div>
-    ${o.caveats ? `<div class="cv">⚠ ${esc(o.caveats)}</div>` : ''}
+    <div class="r1"><div class="nm">${esc(txt(o).name)}</div><span class="pill off">${s.noInstall}</span></div>
+    <div class="sm">${esc(txt(o).summary)}</div>
+    ${txt(o).caveats ? `<div class="cv">⚠ ${esc(txt(o).caveats)}</div>` : ''}
     <div class="acts"><span class="spacer"></span>${o.url
-      ? `<a class="btn go" href="${esc(o.url)}" target="_blank" rel="noopener">Открыть</a>`
-      : '<span class="muted" style="font-size:12px">шаги в описании</span>'}</div>
+      ? `<a class="btn go" href="${esc(o.url)}" target="_blank" rel="noopener">${s.open}</a>`
+      : `<span class="muted" style="font-size:12px">${s.steps}</span>`}</div>
   </article>`).join('');
 }
 
 function render() {
+  const s = T();
   renderNav();
   const pane = el('.scroll');
   const keepScroll = pane.scrollTop;
@@ -295,14 +402,14 @@ function render() {
   const groups = [...order].map((cid) => [cid, apps.filter((a) => a.category === cid)]).filter(([, items]) => items.length);
   const total = st.data.apps.length + (st.data.official || []).length;
   const cat = st.data.categories.find((c) => c.id === st.cat);
-  el('#viewTitle').textContent = cat ? cat.title : 'Все программы';
-  el('#viewCount').textContent = `${apps.length} из ${total}`;
+  el('#viewTitle').textContent = cat ? catTitle(cat) : s.all;
+  el('#viewCount').textContent = `${apps.length} ${s.of} ${total}`;
 
   el('#list').innerHTML = (groups.map(([cid, items]) => {
     const c = st.data.categories.find((x) => x.id === cid);
-    return `<h2>${esc(c.title)}</h2><div class="grid">${items.map(card).join('')}</div>`;
-  }).join('') || '<p class="empty">Ничего не найдено — попробуйте другое слово.</p>')
-    + (st.cat === 'all' && !st.q.trim() ? `<h2>Официальные способы получить Microsoft Office</h2><div class="grid">${officialCards()}</div>` : '');
+    return `<h2>${esc(catTitle(c))}</h2><div class="grid">${items.map(card).join('')}</div>`;
+  }).join('') || `<p class="empty">${s.empty}</p>`)
+    + (st.cat === 'all' && !st.q.trim() ? `<h2>${s.officialTitle}</h2><div class="grid">${officialCards()}</div>` : '');
 
   el('#list').querySelectorAll('.card[data-id]').forEach((node) => {
     const id = node.dataset.id;
@@ -321,37 +428,40 @@ function render() {
 
 function renderPlan() {
   el('#plan').classList.toggle('show', st.plan.size > 0);
-  el('#planCount').textContent = `Выбрано: ${st.plan.size}`;
+  el('#planCount').textContent = `${T().planCount} ${st.plan.size}`;
 }
 
 async function act(path, id) {
+  const s = T();
   const name = st.data.apps.find((a) => a.id === id).name;
   const location = el('#useLoc').checked ? el('#loc').value.trim() : '';
-  say('Запускаю: ' + name + '…');
+  say(s.starting + ' ' + name + '…');
   try {
     await api(path, { id, silent: el('#silent').checked, location });
     el('#jobsBox').classList.remove('hide', 'off');
     await tick();
-    say(name + ': задача запущена');
-  } catch (e) { say('Ошибка: ' + e.message, 'bad'); }
+    say(name + ': ' + s.started);
+  } catch (e) { say(s.error + ' ' + e.message, 'bad'); }
 }
 
 function jobRow(j) {
+  const s = T();
   return `<div class="job">
     <div class="jr"><b>${esc(j.appName)}</b><span class="st ${esc(j.status)}">${esc(j.status)}</span>
-      ${j.status === 'running' ? `<button class="btn" data-cancel="${esc(j.id)}">Отменить</button>` : ''}
-      <span class="spacer"></span><span class="muted" style="font-size:12px">${j.mode === 'upgrade' ? 'обновление' : 'установка'}${j.location ? ' → ' + esc(j.location) : ''}</span></div>
-    <details><summary>вывод winget</summary><pre>${esc(j.tail || '(пока пусто)')}</pre></details>
+      ${j.status === 'running' ? `<button class="btn" data-cancel="${esc(j.id)}">${s.cancel}</button>` : ''}
+      <span class="spacer"></span><span class="muted" style="font-size:12px">${j.mode === 'upgrade' ? s.upgradeMode : s.installMode}${j.location ? ' → ' + esc(j.location) : ''}</span></div>
+    <details><summary>${s.logTitle}</summary><pre>${esc(j.tail || s.logEmpty)}</pre></details>
   </div>`;
 }
 
 async function tick() {
+  const s = T();
   st.jobs = await api('/api/jobs');
   if (st.jobs.length) el('#jobsBox').classList.remove('off');
   const running = st.jobs.filter((j) => j.status === 'running').length;
-  el('#jobsBadge').textContent = running ? `выполняется ${running}` : `${st.jobs.length} задач`;
+  el('#jobsBadge').textContent = running ? `${s.jobsRunning} ${running}` : `${st.jobs.length} ${s.jobsCount}`;
   el('#jobsBadge').className = 'badge' + (running ? ' live' : '');
-  el('#jobs').innerHTML = st.jobs.length ? st.jobs.map(jobRow).join('') : '<div class="empty">Задач пока нет. Нажмите «Установить» на карточке.</div>';
+  el('#jobs').innerHTML = st.jobs.length ? st.jobs.map(jobRow).join('') : `<div class="empty">${s.jobsEmpty}</div>`;
   el('#jobs').querySelectorAll('[data-cancel]').forEach((b) => { b.onclick = async () => { await api('/api/cancel', { jobId: b.dataset.cancel }); await tick(); render(); }; });
   clearTimeout(tick.timer);
   if (running) { st.wasRunning = true; tick.timer = setTimeout(tick, 1200); render(); }
@@ -374,21 +484,53 @@ async function loadLocations() {
   markChip();
 }
 
+function applyStrings() {
+  const s = T();
+  el('#tagline').textContent = s.tagline;
+  el('#q').placeholder = s.search;
+  el('#tUseLoc').textContent = s.useLoc;
+  el('#browse').textContent = s.browse;
+  el('#browse').title = s.browse;
+  el('#locNote').textContent = s.locNote;
+  el('#tSilent').textContent = s.silent;
+  el('#tDetails').textContent = s.details;
+  el('#detailsBody').innerHTML = s.detailsBody;
+  el('#tJobs').textContent = s.jobs;
+  el('#jobsToggle').textContent = s.jobsToggle;
+  el('#planRun').textContent = s.planRun;
+  el('#planClear').textContent = s.planClear;
+  el('#sort').options[0].text = s.sortFidelity;
+  el('#sort').options[1].text = s.sortName;
+  el('#wingetNote').textContent = (st.data && st.data.dry ? s.dryNote + ' ' : '') + (st.data ? st.data.winget : '');
+  el('#lang').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.lang === st.lang));
+}
+
+function setLang(lang) {
+  st.lang = lang;
+  localStorage.setItem('officehub.lang', lang);
+  applyStrings();
+  render();
+  tick();
+  api('/api/title', { title: st.data.windowTitle[st.lang] }).catch(() => {});
+}
+
+el('#lang').querySelectorAll('button').forEach((b) => { b.onclick = () => setLang(b.dataset.lang); });
 el('#q').oninput = (e) => { st.q = e.target.value; render(); };
 el('#sort').onchange = (e) => { st.sort = e.target.value; render(); };
 el('#loc').oninput = markChip;
 el('#useLoc').onchange = markChip;
 el('#browse').onclick = async () => {
+  const s = T();
   el('#browse').disabled = true;
-  say('Открываю выбор папки — диалог может оказаться под окном');
+  say(s.folderOpening);
   try {
     const r = await api('/api/browse', {});
     if (r.path) {
       el('#loc').value = r.path;
       el('#useLoc').checked = true;
       markChip();
-      say('Папка для установки: ' + r.path, 'ok');
-    } else say('Выбор папки отменён');
+      say(s.folderPicked + ' ' + r.path, 'ok');
+    } else say(s.folderCanceled);
   } catch (e) { say(e.message, 'bad'); }
   el('#browse').disabled = false;
 };
@@ -408,18 +550,19 @@ document.addEventListener('keydown', (e) => {
 async function refreshInstalled() {
   const data = await api('/api/catalog');
   st.data = Object.assign(st.data, data);
-  if (data.scanError) say('Не удалось определить установленные: ' + data.scanError, 'bad');
+  if (data.scanError) say(T().error + ' ' + data.scanError, 'bad');
+  applyStrings();
   render();
 }
 
 (async function boot() {
   st.data = await api('/api/catalog');
-  el('#wingetNote').textContent = (st.data.dry ? 'dry: команды не выполняются · ' : '') + st.data.winget;
+  applyStrings();
   render();
   loadLocations();
   await tick();
   if (!st.data.scannedAt) setTimeout(refreshInstalled, 2000);
-})().catch((e) => say('Не удалось загрузить каталог: ' + e.message, 'bad'));
+})().catch((e) => say(T().catalogError + ' ' + e.message, 'bad'));
 </script>
 </body>
 </html>

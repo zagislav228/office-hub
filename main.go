@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 	"unsafe"
@@ -30,35 +31,42 @@ var indexHTML string
 
 const tailLimit = 9000
 
+// Text — перевод одной строки каталога.
+type Text struct {
+	Replaces string `json:"replaces"`
+	License  string `json:"license"`
+	Summary  string `json:"summary"`
+	Caveats  string `json:"caveats"`
+}
+
 type Category struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
+	ID string `json:"id"`
+	Ru string `json:"ru"`
+	En string `json:"en"`
 }
 
 type App struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`
 	Category string   `json:"category"`
-	Replaces string   `json:"replaces"`
 	Formats  []string `json:"formats"`
 	Fidelity int      `json:"fidelity"`
-	License  string   `json:"license"`
-	Summary  string   `json:"summary"`
-	Caveats  string   `json:"caveats"`
+	Ru       Text     `json:"ru"`
+	En       Text     `json:"en"`
 }
 
 // Official — способы получить настоящий Microsoft Office легально; установка не предполагается.
 type Official struct {
-	Name    string `json:"name"`
-	URL     string `json:"url"`
-	Summary string `json:"summary"`
-	Caveats string `json:"caveats"`
+	URL string `json:"url"`
+	Ru  Text   `json:"ru"`
+	En  Text   `json:"en"`
 }
 
 type Catalog struct {
-	Categories []Category `json:"categories"`
-	Apps       []App      `json:"apps"`
-	Official   []Official `json:"official"`
+	Categories  []Category        `json:"categories"`
+	Apps        []App             `json:"apps"`
+	Official    []Official        `json:"official"`
+	WindowTitle map[string]string `json:"windowTitle"`
 }
 
 // JobView is the JSON shape the interface reads.
@@ -437,9 +445,30 @@ type request struct {
 	Silent   bool   `json:"silent"`
 	JobID    string `json:"jobId"`
 	Location string `json:"location"`
+	Title    string `json:"title"`
 }
 
-var absPath = regexp.MustCompile(`^[A-Za-z]:[\\/].+$`)
+var (
+	absPath   = regexp.MustCompile(`^[A-Za-z]:[\\/].+$`)
+	mainView  atomic.Pointer[webview2.WebView]
+	user32DLL = syscall.NewLazyDLL("user32.dll")
+	setTextW  = user32DLL.NewProc("SetWindowTextW")
+)
+
+// setWindowTitle меняет заголовок окна. Dispatch из библиотеки здесь не подходит:
+// главный поток заблокирован в GetMessage, а потоковые сообщения он не разбирает.
+// Текст приходит из встроенных catalog/ui, поэтому экранирование не нужно.
+func setWindowTitle(title string) {
+	view := mainView.Load()
+	if view == nil || title == "" || len(title) > 160 {
+		return
+	}
+	wide, err := syscall.UTF16FromString(title)
+	if err != nil {
+		return
+	}
+	_, _, _ = setTextW.Call(uintptr((*view).Window()), uintptr(unsafe.Pointer(&wide[0])))
+}
 
 func decodeRequest(w http.ResponseWriter, r *http.Request) (request, bool) {
 	var req request
@@ -468,14 +497,15 @@ func (h *Hub) handler() http.Handler {
 	mux.HandleFunc("/api/catalog", func(w http.ResponseWriter, r *http.Request) {
 		h.mutex.Lock()
 		payload := map[string]any{
-			"categories": h.catalog.Categories,
-			"apps":       h.catalog.Apps,
-			"official":   h.catalog.Official,
-			"installed":  h.installed,
-			"scannedAt":  h.scannedAt,
-			"scanError":  h.scanErr,
-			"winget":     h.winget,
-			"dry":        h.dry,
+			"categories":  h.catalog.Categories,
+			"apps":        h.catalog.Apps,
+			"official":    h.catalog.Official,
+			"windowTitle": h.catalog.WindowTitle,
+			"installed":   h.installed,
+			"scannedAt":   h.scannedAt,
+			"scanError":   h.scanErr,
+			"winget":      h.winget,
+			"dry":         h.dry,
 		}
 		h.mutex.Unlock()
 		h.writeJSON(w, 200, payload)
@@ -500,6 +530,16 @@ func (h *Hub) handler() http.Handler {
 			return
 		}
 		h.writeJSON(w, 200, map[string]any{"path": path})
+	})
+
+	mux.HandleFunc("/api/title", func(w http.ResponseWriter, r *http.Request) {
+		req, ok := decodeRequest(w, r)
+		if !ok {
+			h.writeJSON(w, 400, map[string]string{"error": "некорректный запрос"})
+			return
+		}
+		setWindowTitle(req.Title)
+		h.writeJSON(w, 200, map[string]bool{"ok": true})
 	})
 
 	mux.HandleFunc("/api/install", func(w http.ResponseWriter, r *http.Request) { h.act(w, r, "install") })
@@ -627,7 +667,7 @@ func main() {
 		AutoFocus: true,
 		DataPath:  userDataDir(),
 		WindowOptions: webview2.WindowOptions{
-			Title:  "Office Hub — бесплатные замены Microsoft Office",
+			Title:  hub.catalog.WindowTitle["ru"],
 			Width:  1320,
 			Height: 880,
 			Center: true,
@@ -638,6 +678,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer view.Destroy()
+	mainView.Store(&view)
 	paintTitleBar(uintptr(view.Window()))
 
 	port := listener.Addr().(*net.TCPAddr).Port

@@ -7,7 +7,8 @@ No Node.js, no Python, no third-party package manager to install first.
 The catalog is ordered by how closely each program handles Word, Excel and PowerPoint documents. The most compatible
 ones come first, and each card shows a five-step "similarity to MS Office" rating.
 
-Note: the interface is bilingual. A RU/EN switch sits in the sidebar, applies to every label, to the program descriptions in `catalog.json` and to the window title, and the choice is remembered between runs. The default follows the system language.
+The interface is bilingual: an RU/EN switch in the sidebar re-renders every label, the catalog descriptions and the
+window title at once. The choice is remembered between runs and defaults to the system language.
 
 ## Running it
 
@@ -27,7 +28,6 @@ office-hub.exe --dry      :: prints the winget command but installs nothing
 ## What you get in the window
 
 - a sidebar with categories and counts: office, documents, notes, PDF, graphics and diagrams, mail and data, cloud, media and archives
-- an RU/EN switch in the sidebar that re-renders every label, the catalog descriptions and the window title at once
 - search across names, descriptions and file formats; sorting by "most similar to MS Office" or alphabetically
 - one card per program: what it replaces, what it does, license, supported formats and the caveats
 - the installed version is shown right on the card — the list is checked automatically at startup and after every install
@@ -72,6 +72,9 @@ go build -trimpath -ldflags "-s -w -H=windowsgui" -o office-hub.exe .
 ONLYOFFICE and WPS Office preserve layout most faithfully (it is their native format), followed by FreeOffice and LibreOffice
 (which stores in ODF by default and switches to Microsoft formats via a setting). VBA macros, Word form fields and document-wide
 numbering are what survives the move worst.
+
+The language of each installed program is up to its own installer: LibreOffice asks during setup, the others follow the Windows
+display language.
 
 The app cannot make a new office suite the default handler for `.docx`: Windows 11 does not let third-party programs change
 file associations without a person doing it. The UI links to `ms-settings:defaultapps` instead — one manual choice, once.

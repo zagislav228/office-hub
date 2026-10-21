@@ -464,6 +464,41 @@ func messageBox(text, title string) {
 	_, _, _ = proc.Call(0, uintptr(unsafe.Pointer(textPtr)), uintptr(unsafe.Pointer(titlePtr)), 0)
 }
 
+var (
+	dwmapi           = syscall.NewLazyDLL("dwmapi.dll")
+	setWindowAttrPtr = dwmapi.NewProc("DwmSetWindowAttribute")
+)
+
+const (
+	dwmwaUseImmersiveDarkMode = 20
+	dwmwaCaptionColor         = 35
+	dwmwaBorderColor          = 34
+)
+
+// colorref собирает 0x00BBGGRR из hex-цвета вида 0x234876.
+func colorref(hex uint32) int32 {
+	r := int32(hex>>16) & 0xFF
+	g := int32(hex>>8) & 0xFF
+	b := int32(hex) & 0xFF
+	return int32((b << 16) | (g << 8) | r)
+}
+
+func setWindowColor(hwnd uintptr, attr uint32, value int32) {
+	v := value
+	_, _, _ = setWindowAttrPtr.Call(hwnd, uintptr(attr), uintptr(unsafe.Pointer(&v)), unsafe.Sizeof(v))
+}
+
+// paintTitleBar делает полосу заголовка контрастной основному фону приложения.
+func paintTitleBar(hwnd uintptr) {
+	if hwnd == 0 {
+		return
+	}
+	setWindowColor(hwnd, dwmwaUseImmersiveDarkMode, 1)
+	caption := colorref(0x234876)
+	setWindowColor(hwnd, dwmwaCaptionColor, caption)
+	setWindowColor(hwnd, dwmwaBorderColor, caption)
+}
+
 func userDataDir() string {
 	base, err := os.UserConfigDir()
 	if err != nil {
@@ -515,6 +550,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer view.Destroy()
+	paintTitleBar(uintptr(view.Window()))
 
 	port := listener.Addr().(*net.TCPAddr).Port
 	view.Navigate(fmt.Sprintf("http://127.0.0.1:%d/", port))

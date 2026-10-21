@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Office Hub — бесплатные замены Microsoft Office</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --panel2: #1e222b; --line: #2a2f3a;
+    --text: #e6e9ef; --muted: #97a0b0; --accent: #4c9ffe; --ok: #3ecf8e; --warn: #f0a93b; --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, "Segoe UI", sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: rgba(15,17,21,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding: 14px 20px; }
+  h1 { margin: 0 0 2px; font-size: 19px; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+  input[type=search], select { background: var(--panel2); border: 1px solid var(--line); color: var(--text); padding: 8px 11px; border-radius: 8px; font-size: 14px; }
+  input[type=search] { min-width: 260px; }
+  button { background: var(--panel2); border: 1px solid var(--line); color: var(--text); padding: 8px 13px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #06111c; font-weight: 600; }
+  button:disabled { opacity: .5; cursor: default; }
+  label.toggle { color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); color: var(--muted); padding: 5px 11px; border-radius: 999px; font-size: 13px; cursor: pointer; }
+  .chip.on { border-color: var(--accent); color: var(--text); background: #16304a; }
+  main { padding: 18px 20px 140px; max-width: 1400px; margin: 0 auto; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 26px 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+  .card.installed { border-color: #245141; }
+  .top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .name { font-size: 16px; font-weight: 650; }
+  .repl { color: var(--muted); font-size: 13px; }
+  .badge { font-size: 12px; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .b-ok { background: #14361f; color: var(--ok); }
+  .b-no { background: #2a2f3a; color: var(--muted); }
+  .stars { color: var(--warn); letter-spacing: 2px; font-size: 13px; }
+  .sum { font-size: 14px; }
+  .cav { font-size: 13px; color: var(--warn); }
+  .lic { font-size: 12.5px; color: var(--muted); }
+  .fmt { display: flex; flex-wrap: wrap; gap: 5px; }
+  .f { font-family: ui-monospace, Consolas, monospace; font-size: 12px; background: var(--panel2); border: 1px solid var(--line); padding: 2px 7px; border-radius: 6px; color: var(--muted); }
+  .f.ms { color: #9fd0ff; border-color: #2b4c6d; }
+  .acts { display: flex; gap: 8px; align-items: center; margin-top: auto; padding-top: 4px; }
+  .acts .spacer { flex: 1; }
+  #drawer { position: fixed; right: 16px; bottom: 16px; width: min(620px, 92vw); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 50px rgba(0,0,0,.5); display: none; }
+  #drawer.open { display: block; }
+  #drawer .head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  #drawer .body { max-height: 44vh; overflow: auto; padding: 10px 12px; }
+  .job { border-bottom: 1px dashed var(--line); padding: 8px 0; }
+  .job:last-child { border-bottom: 0; }
+  .job .row { display: flex; gap: 8px; align-items: center; }
+  .st { font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+  .st.running { background: #16304a; color: var(--accent); }
+  .st.done { background: #14361f; color: var(--ok); }
+  .st.failed { background: #3a1b1b; color: var(--bad); }
+  .st.canceled, .st.dry-run { background: #332f1c; color: var(--warn); }
+  pre { margin: 6px 0 0; font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--muted); white-space: pre-wrap; word-break: break-word; max-height: 150px; overflow: auto; background: #12151b; padding: 8px; border-radius: 8px; }
+  .plan { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; background: var(--panel2); border: 1px solid var(--accent); border-radius: 999px; padding: 8px 8px 8px 18px; display: none; gap: 10px; align-items: center; z-index: 6; }
+  .plan.show { display: flex; }
+  .hint { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .hint a { color: var(--accent); }
+  .toolbar-note { color: var(--muted); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Office Hub <span class="sub" id="counts"></span></h1>
+  <div class="sub">Бесплатные программы вместо Microsoft Office: с приоритетом на документы, которые открываются и сохраняются в тех же форматах, что и Word, Excel и PowerPoint.</div>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Поиск: docx, таблица, почта, OneNote…">
+    <select id="sort">
+      <option value="fidelity">Сначала максимально похожие на MS Office</option>
+      <option value="name">По названию</option>
+    </select>
+    <button id="scan">Проверить, что уже установлено</button>
+    <label class="toggle"><input type="checkbox" id="silent"> без окна установки (silent)</label>
+    <button id="toggleDrawer">Панель установки</button>
+    <span class="toolbar-note" id="status"></span>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<main>
+  <div class="hint">
+    <b>Про «идентичные форматы».</b> .docx, .xlsx и .pptx — открытые спецификации ECMA-376, и все четыре офисных пакета ниже их читают и пишут.
+    Максимально точно верстку сохраняют <b>ONLYOFFICE</b> и <b>WPS Office</b> (для них это родной формат), затем <b>FreeOffice</b> и <b>LibreOffice</b>
+    (по умолчанию он хранит в .odt/.ods/.odp — формат MS включается отдельной настройкой).
+    Ни один бесплатный офис не повторяет Word на 100 %: сложнее всего переносятся чужие макросы VBA, текстовые поля форм и сквозные нумерации.
+    <br><br>
+    <b>Сделать новый офис программой по умолчанию для .docx</b> сама программа не может: Windows 11 запрещает сторонним приложениям менять
+    ассоциации файлов без участия человека. Откройте
+    <a href="ms-settings:defaultapps" target="_blank" rel="noopener">Параметры → Приложения по умолчанию</a>
+    или <a href="ms-settings:appsdefaults" target="_blank" rel="noopener">Файлы и протоколы по умолчанию</a> и выберите нужное приложение один раз.
+  </div>
+  <div id="list"></div>
+</main>
+
+<div class="plan" id="plan">
+  <span id="planCount"></span>
+  <button class="primary" id="planRun">Установить выбранное</button>
+  <button id="planClear">Сбросить</button>
+</div>
+
+<div id="drawer" class="open">
+  <div class="head">Установка <span class="sub" id="drawerNote"></span></div>
+  <div class="body" id="jobs"><div class="sub">Пока пусто. Выберите программу и нажмите «Установить».</div></div>
+</div>
+
+<script>
+const state = { catalog: null, q: '', cat: 'all', sort: 'fidelity', plan: new Set(), jobs: [] };
+const $ = (s) => document.querySelector(s);
+const els = { list: $('#list'), chips: $('#chips'), status: $('#status'), jobs: $('#jobs'), counts: $('#counts'), plan: $('#plan') };
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtChip = (f) => `<span class="f${/\.(docx|xlsx|pptx|doc|xls|ppt)$/.test(f) ? ' ms' : ''}">${esc(f)}</span>`;
+const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+async function api(path, body) {
+  const res = body === undefined
+    ? await fetch(path)
+    : await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.status);
+  return data;
+}
+
+async function loadCatalog() {
+  state.catalog = await api('/api/catalog');
+  els.counts.textContent = `· ${state.catalog.apps.length} программ`;
+  if (state.catalog.dry) els.status.textContent = 'Учебный режим: команды winget показываются, но не выполняются';
+  else if (state.catalog.scanError) els.status.textContent = 'winget недоступен: ' + state.catalog.scanError;
+  renderChips();
+  render();
+}
+
+function renderChips() {
+  const cats = [{ id: 'all', title: 'Все' }, ...state.catalog.categories];
+  els.chips.innerHTML = cats.map((c) => `<button class="chip${state.cat === c.id ? ' on' : ''}" data-cat="${c.id}">${esc(c.title)}</button>`).join('');
+  els.chips.querySelectorAll('.chip').forEach((b) => b.onclick = () => { state.cat = b.dataset.cat; renderChips(); render(); });
+}
+
+function visible() {
+  const q = state.q.trim().toLowerCase();
+  return state.catalog.apps
+    .filter((a) => state.cat === 'all' || a.category === state.cat)
+    .filter((a) => !q || [a.name, a.replaces, a.summary, a.license, a.formats.join(' ')].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => state.sort === 'name' ? a.name.localeCompare(b.name) : b.fidelity - a.fidelity);
+}
+
+function card(a) {
+  const ver = state.catalog.installed[a.id];
+  const planned = state.plan.has(a.id);
+  return `<article class="card${ver ? ' installed' : ''}" data-id="${esc(a.id)}">
+    <div class="top">
+      <div>
+        <div class="name">${esc(a.name)}</div>
+        <div class="repl">Вместо: ${esc(a.replaces)}</div>
+      </div>
+      <span class="badge ${ver ? 'b-ok' : 'b-no'}">${ver ? 'Установлено ' + esc(ver) : 'Не установлено'}</span>
+    </div>
+    <div class="stars" title="Насколько похоже на MS Office по интерфейсу и совместимости форматов">${stars(a.fidelity)} <span class="repl">сходство с MS Office</span></div>
+    <div class="sum">${esc(a.summary)}</div>
+    ${a.caveats ? `<div class="cav">⚠ ${esc(a.caveats)}</div>` : ''}
+    <div class="lic">${esc(a.license)}</div>
+    <div class="fmt">${a.formats.map(fmtChip).join('')}</div>
+    <div class="acts">
+      <label class="toggle"><input type="checkbox" class="planbox" ${planned ? 'checked' : ''}>в план</label>
+      <span class="spacer"></span>
+      <button class="inst primary">Установить</button>
+      ${ver ? '<button class="upg">Обновить</button>' : ''}
+    </div>
+  </article>`;
+}
+
+function render() {
+  const apps = visible();
+  const order = state.catalog.categories.map((c) => c.id);
+  const groups = [...order, ...new Set(apps.map((a) => a.category).filter((c) => !order.includes(c)))]
+    .map((cid) => [cid, apps.filter((a) => a.category === cid)])
+    .filter(([, items]) => items.length);
+  els.list.innerHTML = groups.map(([cid, items]) => {
+    const cat = state.catalog.categories.find((c) => c.id === cid);
+    return `<h2>${esc(cat ? cat.title : cid)}</h2><div class="grid">${items.map(card).join('')}</div>`;
+  }).join('') || '<p class="sub">Ничего не найдено — попробуйте другое слово.</p>';
+
+  els.list.querySelectorAll('.card').forEach((el) => {
+    const id = el.dataset.id;
+    el.querySelector('.inst').onclick = () => act('/api/install', id);
+    const u = el.querySelector('.upg');
+    if (u) u.onclick = () => act('/api/upgrade', id);
+    el.querySelector('.planbox').onchange = (e) => {
+      e.target.checked ? state.plan.add(id) : state.plan.delete(id);
+      renderPlan();
+    };
+  });
+  renderPlan();
+}
+
+function renderPlan() {
+  els.plan.classList.toggle('show', state.plan.size > 0);
+  $('#planCount').textContent = `В плане: ${state.plan.size}`;
+}
+
+async function act(path, id) {
+  const name = state.catalog.apps.find((a) => a.id === id).name;
+  els.status.textContent = `Запускаю установку: ${name}…`;
+  try {
+    const job = await api(path, { id, silent: $('#silent').checked });
+    $('#drawer').classList.add('open');
+    tickJobs();
+    els.status.textContent = `${name}: задача #${job.id.slice(0, 8)} запущена`;
+  } catch (e) {
+    els.status.textContent = 'Ошибка: ' + e.message;
+  }
+}
+
+function jobRow(j) {
+  return `<div class="job">
+    <div class="row"><b>${esc(j.appName)}</b><span class="st ${j.status}">${esc(j.status)}</span>
+    ${j.status === 'running' ? `<button data-cancel="${j.id}">Отменить</button>` : ''}
+    <span class="spacer" style="flex:1"></span><span class="sub">${j.mode === 'upgrade' ? 'обновление' : 'установка'}</span></div>
+    <pre>${esc(j.tail || '')}</pre>
+  </div>`;
+}
+
+async function tickJobs() {
+  state.jobs = await api('/api/jobs');
+  els.jobs.innerHTML = state.jobs.length
+    ? state.jobs.map(jobRow).join('')
+    : '<div class="sub">Пока пусто. Выберите программу и нажмите «Установить».</div>';
+  els.jobs.querySelectorAll('[data-cancel]').forEach((b) => b.onclick = async () => {
+    await api('/api/cancel', { jobId: b.dataset.cancel });
+    tickJobs();
+  });
+  const running = state.jobs.some((j) => j.status === 'running');
+  $('#drawerNote').textContent = running ? 'выполняется…' : '';
+  els.status.textContent = running ? 'Идёт установка — окно winget может попросить подтверждение UAC.' : els.status.textContent;
+  clearTimeout(tickJobs.t);
+  if (running) tickJobs.t = setTimeout(tickJobs, 1200);
+}
+
+$('#q').oninput = (e) => { state.q = e.target.value; render(); };
+$('#sort').onchange = (e) => { state.sort = e.target.value; render(); };
+$('#scan').onclick = async () => {
+  $('#scan').disabled = true;
+  els.status.textContent = 'Сверяюсь со списком установленного в Windows…';
+  const r = await api('/api/scan', {});
+  state.catalog.installed = r.installed;
+  els.status.textContent = r.error ? 'winget list не удался: ' + r.error : `Проверено: установлено ${Object.keys(r.installed).length} из ${state.catalog.apps.length}`;
+  $('#scan').disabled = false;
+  render();
+};
+$('#toggleDrawer').onclick = () => $('#drawer').classList.toggle('open');
+$('#planClear').onclick = () => { state.plan.clear(); render(); };
+$('#planRun').onclick = async () => {
+  const ids = [...state.plan];
+  for (const id of ids) {
+    await act('/api/install', id);
+    if (!state.catalog.dry) await new Promise((r) => setTimeout(r, 1500));
+  }
+};
+
+loadCatalog().then(tickJobs).catch((e) => { els.status.textContent = 'Не удалось загрузить каталог: ' + e.message; });
+</script>
+</body>
+</html>

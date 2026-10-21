@@ -1,4 +1,5 @@
 /office-hub.exe
+/office-hub.exe~
 *.png
 *.log
 node_modules/

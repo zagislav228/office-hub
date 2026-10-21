@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Office Hub</title>
+<style>
+  :root {
+    --bg: #0d1017; --side: #11151d; --panel: #151a23; --raise: #1b212c; --line: #262d3a;
+    --text: #e8ebf2; --muted: #8d97a8; --accent: #55a0ff; --ok: #3ddc97; --warn: #f2b544; --bad: #ff6b6b;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text); overflow: hidden;
+    font: 14px/1.55 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  }
+  .app { display: grid; grid-template-columns: 268px 1fr; height: 100vh; }
+
+  /* ---------- sidebar ---------- */
+  aside { background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: 18px 18px 12px; }
+  .brand h1 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: .2px; }
+  .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12.5px; }
+  .search { padding: 0 14px 12px; }
+  .search input {
+    width: 100%; background: var(--raise); border: 1px solid var(--line); color: var(--text);
+    padding: 9px 11px; border-radius: 10px; font-size: 13.5px;
+  }
+  .search input:focus { outline: none; border-color: var(--accent); }
+  nav { flex: 1; min-height: 0; overflow: auto; padding: 2px 8px 10px; }
+  nav button {
+    display: flex; width: 100%; align-items: center; gap: 8px; text-align: left; cursor: pointer;
+    background: none; border: 0; border-radius: 9px; color: var(--muted); padding: 8px 10px; font-size: 13.5px;
+  }
+  nav button:hover { background: var(--raise); color: var(--text); }
+  nav button.on { background: #1b2a3f; color: #cfe4ff; }
+  nav button .n { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .sidefoot { border-top: 1px solid var(--line); padding: 12px 14px; display: grid; gap: 9px; }
+  .switch { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12.5px; cursor: pointer; }
+  .sidefoot .note { color: #6f7a8c; font-size: 11.5px; word-break: break-all; }
+  .btn {
+    background: var(--raise); border: 1px solid var(--line); color: var(--text);
+    padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 13.5px; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.go { background: var(--accent); border-color: var(--accent); color: #04121f; font-weight: 600; }
+  .btn.ghost { background: transparent; }
+
+  /* ---------- main ---------- */
+  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid var(--line); background: #0f131b; }
+  .topbar .title { font-size: 15.5px; font-weight: 640; }
+  .topbar .count { color: var(--muted); font-size: 12.5px; }
+  .topbar .spacer { flex: 1; }
+  .topbar select { background: var(--raise); border: 1px solid var(--line); color: var(--text); padding: 7px 10px; border-radius: 9px; font-size: 13px; }
+  .status { font-size: 12.5px; color: var(--muted); max-width: 44ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .status.bad { color: var(--bad); }
+  .status.ok { color: var(--ok); }
+  .scroll { overflow: auto; padding: 18px 22px 120px; flex: 1; min-height: 0; }
+  .details { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 18px; font-size: 13.5px; color: #c6cede; }
+  .details summary { cursor: pointer; font-weight: 600; color: var(--text); }
+  .details a { color: var(--accent); }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #7f8a9c; margin: 22px 0 10px; }
+  h2:first-of-type { margin-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(390px, 1fr)); gap: 14px; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 15px; display: flex; flex-direction: column; gap: 10px; transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: #3a475c; transform: translateY(-1px); }
+  .card.has { border-color: #23503e; background: #131a17; }
+  .card.busy { border-color: var(--accent); }
+  .r1 { display: flex; gap: 10px; align-items: flex-start; }
+  .nm { font-size: 15.5px; font-weight: 650; }
+  .rp { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .pill { margin-left: auto; font-size: 11.5px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .pill.has { background: #14351f; color: var(--ok); }
+  .pill.no { background: var(--raise); color: var(--muted); }
+  .sim { display: flex; align-items: center; gap: 8px; }
+  .dots { display: flex; gap: 4px; }
+  .dots i { width: 26px; height: 5px; border-radius: 3px; background: var(--raise); display: block; }
+  .dots i.f { background: var(--warn); }
+  .sim span { font-size: 11.5px; color: var(--muted); }
+  .sm { font-size: 13.5px; color: #cfd6e4; }
+  .cv { font-size: 12.5px; color: var(--warn); background: #221c10; border: 1px solid #3a2f14; border-radius: 9px; padding: 7px 10px; }
+  .li { font-size: 12px; color: var(--muted); }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; background: var(--raise); border: 1px solid var(--line); color: var(--muted); padding: 2px 7px; border-radius: 7px; }
+  .tag.ms { color: #a9d4ff; border-color: #2f4f70; background: #14202e; }
+  .acts { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 2px; }
+  .acts .spacer { flex: 1; }
+
+  /* ---------- jobs sheet ---------- */
+  .jobs { position: fixed; right: 18px; bottom: 18px; width: min(660px, calc(100vw - 320px)); background: var(--panel); border: 1px solid #33405a; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.55); overflow: hidden; }
+  .jobs.off { display: none; }
+  .jobs.hide .jb { display: none; }
+  .jh { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; background: #131924; border-bottom: 1px solid var(--line); font-weight: 620; }
+  .jobs.hide .jh { border-bottom: 0; }
+  .jh .badge { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: var(--raise); color: var(--muted); font-weight: 500; }
+  .jh .badge.live { background: #14293f; color: var(--accent); }
+  .jb { max-height: 42vh; overflow: auto; padding: 6px 14px 12px; }
+  .job { padding: 10px 0; border-bottom: 1px dashed var(--line); }
+  .job:last-child { border-bottom: 0; }
+  .jr { display: flex; align-items: center; gap: 9px; }
+  .jr b { font-size: 13.5px; }
+  .st { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; }
+  .st.running { background: #14293f; color: var(--accent); }
+  .st.done { background: #14351f; color: var(--ok); }
+  .st.failed { background: #351717; color: var(--bad); }
+  .st.canceled, .st.dry-run { background: #2f2814; color: var(--warn); }
+  .job .spacer { flex: 1; }
+  .job summary { cursor: pointer; color: #7f8a9c; font-size: 12px; margin-top: 6px; }
+  pre { margin: 6px 0 0; font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.5; color: #9aa5b7; white-space: pre-wrap; word-break: break-word; max-height: 170px; overflow: auto; background: #0f141c; border: 1px solid var(--line); border-radius: 9px; padding: 9px; }
+  .empty { color: var(--muted); padding: 10px 0 4px; font-size: 13px; }
+
+  /* ---------- plan bar ---------- */
+  .plan { position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 8; display: none; align-items: center; gap: 10px; background: var(--raise); border: 1px solid var(--accent); border-radius: 999px; padding: 7px 8px 7px 18px; box-shadow: 0 12px 34px rgba(0,0,0,.5); }
+  .plan.show { display: flex; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <h1>Office Hub</h1>
+      <p>Бесплатные замены Microsoft Office</p>
+    </div>
+    <div class="search"><input id="q" type="search" placeholder="Поиск: docx, таблица, почта…"></div>
+    <nav id="nav"></nav>
+    <div class="sidefoot">
+      <button class="btn" id="scan">Что уже установлено</button>
+      <label class="switch"><input type="checkbox" id="silent"> Тихая установка (без окон)</label>
+      <div class="note" id="wingetNote"></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <div class="title" id="viewTitle">Все программы</div>
+        <div class="count" id="viewCount"></div>
+      </div>
+      <div class="spacer"></div>
+      <div class="status" id="status"></div>
+      <select id="sort">
+        <option value="fidelity">Сначала похожие на MS Office</option>
+        <option value="name">По названию</option>
+      </select>
+    </div>
+    <div class="scroll">
+      <details class="details">
+        <summary>Форматы .docx, .xlsx, .pptx и что умеют бесплатные офисы</summary>
+        <div style="margin-top:10px">
+          Все четыре офисных пакета читают и пишут <b>.docx / .xlsx / .pptx</b> — это открытая спецификация ECMA-376.
+          Максимально точно верстку сохраняют <b>ONLYOFFICE</b> и <b>WPS Office</b> (для них это родной формат),
+          затем <b>FreeOffice</b> и <b>LibreOffice</b> (хранит по умолчанию в .odt/.ods/.odp, формат MS включается настройкой).
+          Хуже всего переносятся макросы VBA, поля форм Word и сквозные нумерации.
+          <br><br>
+          Windows 11 не позволяет программе молча назначить редактор по умолчанию для расширения — сделать это нужно один раз руками:
+          <a href="ms-settings:defaultapps" target="_blank" rel="noopener">Параметры → Приложения по умолчанию</a>.
+        </div>
+      </details>
+      <div id="list"></div>
+    </div>
+  </main>
+</div>
+
+<div class="plan" id="plan">
+  <span id="planCount" class="muted"></span>
+  <button class="btn go" id="planRun">Установить выбранное</button>
+  <button class="btn ghost" id="planClear">Сбросить</button>
+</div>
+
+<div class="jobs off hide" id="jobsBox">
+  <div class="jh" id="jobsHead">
+    Установка <span class="badge" id="jobsBadge">0</span>
+    <span class="spacer" style="flex:1"></span>
+    <span class="muted" id="jobsToggle" style="font-size:12px">свернуть/развернуть</span>
+  </div>
+  <div class="jb" id="jobs"></div>
+</div>
+
+<script>
+const st = { data: null, q: '', cat: 'all', sort: 'fidelity', plan: new Set(), jobs: [] };
+const el = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function api(path, body) {
+  const res = body === undefined ? await fetch(path) : await fetch(path, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+  return data;
+}
+
+function say(text, kind = '') {
+  const s = el('#status');
+  s.textContent = text;
+  s.className = 'status ' + kind;
+}
+
+function dots(n) {
+  return `<span class="dots">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'f' : ''}"></i>`).join('')}</span>`;
+}
+
+function card(a) {
+  const ver = st.data.installed[a.id];
+  const busy = st.jobs.some((j) => j.appId === a.id && j.status === 'running');
+  return `<article class="card${ver ? ' has' : ''}${busy ? ' busy' : ''}" data-id="${esc(a.id)}">
+    <div class="r1">
+      <div>
+        <div class="nm">${esc(a.name)}</div>
+        <div class="rp">Вместо: ${esc(a.replaces)}</div>
+      </div>
+      <span class="pill ${ver ? 'has' : 'no'}">${ver ? '✓ ' + esc(ver) : 'не установлено'}</span>
+    </div>
+    <div class="sim">${dots(a.fidelity)}<span>сходство с MS Office</span></div>
+    <div class="sm">${esc(a.summary)}</div>
+    ${a.caveats ? `<div class="cv">⚠ ${esc(a.caveats)}</div>` : ''}
+    <div class="li">${esc(a.license)}</div>
+    <div class="tags">${a.formats.map((f) => `<span class="tag${/\.(docx|xlsx|pptx|doc|xls|ppt)$/.test(f) ? ' ms' : ''}">${esc(f)}</span>`).join('')}</div>
+    <div class="acts">
+      <label class="switch"><input type="checkbox" class="planbox" ${st.plan.has(a.id) ? 'checked' : ''}> в план</label>
+      <span class="spacer"></span>
+      <button class="btn inst go" ${busy ? 'disabled' : ''}>${busy ? 'Устанавливается…' : 'Установить'}</button>
+      ${ver ? '<button class="btn upg">Обновить</button>' : ''}
+    </div>
+  </article>`;
+}
+
+function visible() {
+  const q = st.q.trim().toLowerCase();
+  return st.data.apps
+    .filter((a) => st.cat === 'all' || a.category === st.cat)
+    .filter((a) => !q || [a.name, a.replaces, a.summary, a.license, a.replaces, a.formats.join(' ')].join(' ').toLowerCase().includes(q))
+    .sort((x, y) => st.sort === 'name' ? x.name.localeCompare(y.name) : y.fidelity - x.fidelity);
+}
+
+function renderNav() {
+  const cats = [{ id: 'all', title: 'Все программы' }, ...st.data.categories];
+  el('#nav').innerHTML = cats.map((c) => {
+    const n = c.id === 'all' ? st.data.apps.length : st.data.apps.filter((a) => a.category === c.id).length;
+    return `<button data-cat="${c.id}" class="${st.cat === c.id ? 'on' : ''}">${esc(c.title)}<span class="n">${n}</span></button>`;
+  }).join('');
+  el('#nav').querySelectorAll('button').forEach((b) => { b.onclick = () => { st.cat = b.dataset.cat; render(); }; });
+}
+
+function render() {
+  renderNav();
+  const pane = el('.scroll');
+  const keepScroll = pane.scrollTop;
+  const apps = visible();
+  const order = st.data.categories.map((c) => c.id);
+  const groups = [...order].map((cid) => [cid, apps.filter((a) => a.category === cid)]).filter(([, items]) => items.length);
+  const cat = st.data.categories.find((c) => c.id === st.cat);
+  el('#viewTitle').textContent = cat ? cat.title : 'Все программы';
+  el('#viewCount').textContent = `${apps.length} из ${st.data.apps.length} · установлено ${Object.keys(st.data.installed).length}`;
+
+  el('#list').innerHTML = groups.map(([cid, items]) => {
+    const c = st.data.categories.find((x) => x.id === cid);
+    return `<h2>${esc(c.title)}</h2><div class="grid">${items.map(card).join('')}</div>`;
+  }).join('') || '<p class="empty">Ничего не найдено — попробуйте другое слово.</p>';
+
+  el('#list').querySelectorAll('.card').forEach((node) => {
+    const id = node.dataset.id;
+    const inst = node.querySelector('.inst');
+    if (inst && !inst.disabled) inst.onclick = () => act('/api/install', id);
+    const upg = node.querySelector('.upg');
+    if (upg) upg.onclick = () => act('/api/upgrade', id);
+    node.querySelector('.planbox').onchange = (e) => {
+      e.target.checked ? st.plan.add(id) : st.plan.delete(id);
+      renderPlan();
+    };
+  });
+  renderPlan();
+  pane.scrollTop = keepScroll;
+}
+
+function renderPlan() {
+  el('#plan').classList.toggle('show', st.plan.size > 0);
+  el('#planCount').textContent = `Выбрано: ${st.plan.size}`;
+}
+
+async function act(path, id) {
+  const name = st.data.apps.find((a) => a.id === id).name;
+  say('Запускаю: ' + name + '…');
+  try {
+    await api(path, { id, silent: el('#silent').checked });
+    el('#jobsBox').classList.remove('hide', 'off');
+    await tick();
+    say(name + ': задача запущена');
+  } catch (e) { say('Ошибка: ' + e.message, 'bad'); }
+}
+
+function jobRow(j) {
+  return `<div class="job">
+    <div class="jr"><b>${esc(j.appName)}</b><span class="st ${esc(j.status)}">${esc(j.status)}</span>
+      ${j.status === 'running' ? `<button class="btn" data-cancel="${esc(j.id)}">Отменить</button>` : ''}
+      <span class="spacer"></span><span class="muted" style="font-size:12px">${j.mode === 'upgrade' ? 'обновление' : 'установка'}</span></div>
+    <details><summary>вывод winget</summary><pre>${esc(j.tail || '(пока пусто)')}</pre></details>
+  </div>`;
+}
+
+async function tick() {
+  st.jobs = await api('/api/jobs');
+  if (st.jobs.length) el('#jobsBox').classList.remove('off');
+  const running = st.jobs.filter((j) => j.status === 'running').length;
+  el('#jobsBadge').textContent = running ? `выполняется ${running}` : `${st.jobs.length} задач`;
+  el('#jobsBadge').className = 'badge' + (running ? ' live' : '');
+  el('#jobs').innerHTML = st.jobs.length ? st.jobs.map(jobRow).join('') : '<div class="empty">Задач пока нет. Нажмите «Установить» на карточке.</div>';
+  el('#jobs').querySelectorAll('[data-cancel]').forEach((b) => { b.onclick = async () => { await api('/api/cancel', { jobId: b.dataset.cancel }); await tick(); render(); }; });
+  clearTimeout(tick.timer);
+  if (running) { tick.timer = setTimeout(tick, 1200); render(); }
+  return running;
+}
+
+el('#q').oninput = (e) => { st.q = e.target.value; render(); };
+el('#sort').onchange = (e) => { st.sort = e.target.value; render(); };
+el('#scan').onclick = async () => {
+  el('#scan').disabled = true;
+  say('Сверяюсь с установленными в Windows…');
+  try {
+    const r = await api('/api/scan', {});
+    st.data.installed = r.installed;
+    st.data.scanError = r.error;
+    say(r.error ? r.error : `Проверено: установлено ${Object.keys(r.installed).length} из ${st.data.apps.length}`, r.error ? 'bad' : 'ok');
+  } catch (e) { say('winget недоступен: ' + e.message, 'bad'); }
+  el('#scan').disabled = false;
+  render();
+};
+el('#jobsHead').onclick = () => el('#jobsBox').classList.toggle('hide');
+el('#planClear').onclick = () => { st.plan.clear(); render(); };
+el('#planRun').onclick = async () => {
+  for (const id of [...st.plan]) {
+    await act('/api/install', id);
+    if (!st.data.dry) await new Promise((r) => setTimeout(r, 1500));
+  }
+};
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement !== el('#q')) { e.preventDefault(); el('#q').focus(); }
+  if (e.key === 'Escape') { el('#q').value = ''; st.q = ''; render(); }
+});
+
+function reportScan() {
+  const n = Object.keys(st.data.installed).length;
+  if (st.data.scanError) say(st.data.scanError, 'bad');
+  else if (st.data.scannedAt) say(`Проверено: установлено ${n} из ${st.data.apps.length}`, 'ok');
+}
+
+(async function boot() {
+  st.data = await api('/api/catalog');
+  el('#wingetNote').textContent = (st.data.dry ? 'dry: команды не выполняются · ' : '') + st.data.winget;
+  reportScan();
+  render();
+  await tick();
+  if (!st.data.scannedAt && !st.data.dry) {
+    say('Сверяюсь с установленными в Windows…');
+    setTimeout(async () => {
+      st.data = await api('/api/catalog');
+      reportScan();
+      render();
+    }, 2500);
+  }
+})().catch((e) => say('Не удалось загрузить каталог: ' + e.message, 'bad'));
+</script>
+</body>
+</html>

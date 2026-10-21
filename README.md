@@ -1,75 +1,76 @@
 # Office Hub
 
-Однофайловое приложение для Windows: каталог из 27 бесплатных программ вместо Microsoft Office и других продуктов
-Microsoft. Запускаете `office-hub.exe`, выбираете нужное, нажимаете «Установить» — установка идёт через `winget`.
-Никакого Node.js, Python или установщиков-агрегаторов ставить не нужно.
+A single-file Windows app: a catalog of 27 free replacements for Microsoft Office and other Microsoft products.
+Run `office-hub.exe`, pick what you need, press Install — the software is installed through `winget`.
+No Node.js, no Python, no third-party package manager to install first.
 
-Приоритет в каталоге отдан программам, которые максимально близко работают с документами Word, Excel и PowerPoint:
-они стоят первыми, и у каждой показано сходство с MS Office пятью делениями.
+The catalog is ordered by how closely each program handles Word, Excel and PowerPoint documents. The most compatible
+ones come first, and each card shows a five-step "similarity to MS Office" rating.
 
-## Запуск
+Note: the interface is currently in Russian. The catalog data lives in `catalog.json` and is easy to translate.
 
-Двойной клик по `office-hub.exe` — откроется окно приложения.
+## Running it
 
-Сам файл не устанавливается и не требует установщика: каталог и интерфейс зашиты внутрь бинарника, рядом с собой он ничего
-не создаёт. Его можно держать в «Загрузках», в любой папке или на флешке, а для удаления просто стереть файл. Служебный кэш
-WebView2 пишется в `%LOCALAPPDATA%\OfficeHub`.
+Double-click `office-hub.exe` — the app window opens.
 
-Из терминала:
+The file needs no installer and does not install itself: the catalog and the UI are embedded in the binary, and it
+creates nothing next to itself. Keep it in Downloads, in any folder or on a USB stick; to remove it, delete the file.
+WebView2 keeps its cache in `%LOCALAPPDATA%\OfficeHub`.
+
+From a terminal:
 
 ```bat
-office-hub.exe            :: обычный запуск
-office-hub.exe --dry      :: показывает команду winget, но ничего не устанавливает
+office-hub.exe            :: normal run
+office-hub.exe --dry      :: prints the winget command but installs nothing
 ```
 
-## Что в окне
+## What you get in the window
 
-- боковая панель с категориями и счётчиками: офис, документы, заметки, PDF, графика и схемы, почта и данные, облако, медиа и архивы
-- поиск по названию, описанию и форматам; сортировка «сначала похожие на MS Office» или по алфавиту
-- карточка на каждую программу: вместо чего, что умеет, лицензия, поддерживаемые форматы и подводные камни
-- версия уже установленной программы показывается прямо на карточке: список проверяется сам при запуске и после каждой установки
-- выбор папки установки: поле с путём, кнопка «Обзор» (системный диалог выбора папки) и быстрые варианты — `%LOCALAPPDATA%\Programs`,
-  `C:\Program Files`, папки на других дисках. Путь добавляется как `winget --location`, поэтому работает для тех пакетов,
-  чей инсталлер это поддерживает; остальные установятся по умолчанию, и winget напишет об этом в панели вывода
-- установка по одной и пакетом («в план» → «Установить выбранное»), кнопка «Обновить» для установленных
-- панель вывода `winget` с живым логом и отменой задачи
-- переключатель «Тихая установка» — добавляет `--silent`
-- горячая клавиша `/` — фокус в поиск, `Esc` — сбросить
-- отдельный блок «Официальные способы получить Microsoft Office» — бесплатный веб-Office, проверка учебной или рабочей
-  лицензии Microsoft 365 и установка веб-Word как PWA-приложения через Edge. Это ссылки и инструкции, а не установка:
-  пиратских сборок, кряков и ключей в приложении нет и не будет
+- a sidebar with categories and counts: office, documents, notes, PDF, graphics and diagrams, mail and data, cloud, media and archives
+- search across names, descriptions and file formats; sorting by "most similar to MS Office" or alphabetically
+- one card per program: what it replaces, what it does, license, supported formats and the caveats
+- the installed version is shown right on the card — the list is checked automatically at startup and after every install
+- install folder selection: a path field, a Browse button (native folder picker) and quick presets — `%LOCALAPPDATA%\Programs`,
+  `C:\Program Files`, folders on other drives. The path is passed to `winget --location`, so it works only for packages whose
+  installer supports a custom location; the rest install to their default place and winget says so in the output panel
+- install one at a time or in bulk ("add to plan" → "Install selected"), plus an Update button for installed software
+- a `winget` output panel with a live log and the ability to cancel a running job
+- a "Silent install" switch that adds `--silent`
+- keyboard shortcuts: `/` focuses search, `Esc` clears it
+- a separate section, "Official ways to get Microsoft Office": the free web version of Office, checking whether your school
+  or employer already provides Microsoft 365, and installing web Word as a PWA through Edge. These are links and instructions,
+  not installs — the app contains no cracked builds, keygens or license keys, and never will
 
-## Требования
+## Requirements
 
-- Windows 10 или 11
-- `winget` (App Installer) — есть во всех свежих сборках Windows
-- WebView2 Runtime — встроен в Windows 11; если его нет, приложение сообщит и подскажет установить Microsoft Edge
+- Windows 10 or 11
+- `winget` (App Installer) — present on all current Windows builds
+- WebView2 Runtime — built into Windows 11; if it is missing, the app says so and points to Microsoft Edge
 
-## Сборка из исходников
+## Building from source
 
-Нужен Go 1.27+ (только для сборки, конечному пользователю не требуется):
+Go 1.27 or newer is needed to build (end users do not need Go):
 
 ```bat
 go build -trimpath -ldflags "-s -w -H=windowsgui" -o office-hub.exe .
 ```
 
-Флаг `-H=windowsgui` убирает консольное окно, каталог и интерфейс вшиваются в бинарник через `go:embed`.
+`-H=windowsgui` removes the console window; the catalog and the UI are compiled into the binary with `go:embed`.
 
-## Безопасность
+## Security
 
-- сервер приложения слушает только `127.0.0.1` на случайном порту и недоступен из сети
-- установка возможна исключительно по ID из каталога: произвольную команду через интерфейс не передать, `winget`
-  запускается напрямую, без оболочки
-- кэш WebView2 пишется в `%LOCALAPPDATA%\OfficeHub`, а не в папку с программой
-- инсталлеры, требующие прав администратора, по-прежнему подтверждают это окном UAC — приложение не повышает права молча
+- the app server binds to `127.0.0.1` on a random port and is not reachable from the network
+- installation is possible only by an ID present in the catalog: no arbitrary command can be passed through the UI, and
+  `winget` is executed directly, without a shell
+- the WebView2 cache goes to `%LOCALAPPDATA%\OfficeHub`, not into the app folder
+- installers that need administrator rights still raise a UAC prompt — the app never elevates silently
 
-## Форматы файлов и ассоциации
+## File formats and associations
 
-`.docx`, `.xlsx`, `.pptx` — открытая спецификация ECMA-376, и все четыре офисных пакета в каталоге их читают и пишут.
-Точнее всего верстку сохраняют ONLYOFFICE и WPS Office (для них это родной формат), затем FreeOffice и LibreOffice
-(по умолчанию хранит в ODF, формат MS включается настройкой). Хуже всего переносятся макросы VBA, поля форм Word
-и сквозные нумерации.
+`.docx`, `.xlsx` and `.pptx` are the open ECMA-376 specification, and all four office suites in the catalog read and write them.
+ONLYOFFICE and WPS Office preserve layout most faithfully (it is their native format), followed by FreeOffice and LibreOffice
+(which stores in ODF by default and switches to Microsoft formats via a setting). VBA macros, Word form fields and document-wide
+numbering are what survives the move worst.
 
-Назначить новый офис редактором по умолчанию для `.docx` программа не может: Windows 11 запрещает сторонним приложениям
-менять ассоциации файлов без участия человека. В интерфейсе есть ссылка на `ms-settings:defaultapps` — выбрать один раз
-придётся вручную.
+The app cannot make a new office suite the default handler for `.docx`: Windows 11 does not let third-party programs change
+file associations without a person doing it. The UI links to `ms-settings:defaultapps` instead — one manual choice, once.

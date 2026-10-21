@@ -47,9 +47,18 @@ type App struct {
 	Caveats  string   `json:"caveats"`
 }
 
+// Official — способы получить настоящий Microsoft Office легально; установка не предполагается.
+type Official struct {
+	Name    string `json:"name"`
+	URL     string `json:"url"`
+	Summary string `json:"summary"`
+	Caveats string `json:"caveats"`
+}
+
 type Catalog struct {
 	Categories []Category `json:"categories"`
 	Apps       []App      `json:"apps"`
+	Official   []Official `json:"official"`
 }
 
 // JobView is the JSON shape the interface reads.
@@ -461,6 +470,7 @@ func (h *Hub) handler() http.Handler {
 		payload := map[string]any{
 			"categories": h.catalog.Categories,
 			"apps":       h.catalog.Apps,
+			"official":   h.catalog.Official,
 			"installed":  h.installed,
 			"scannedAt":  h.scannedAt,
 			"scanError":  h.scanErr,

@@ -59,6 +59,7 @@ type JobView struct {
 	AppName   string `json:"appName"`
 	Mode      string `json:"mode"`
 	Command   string `json:"command"`
+	Location  string `json:"location"`
 	Status    string `json:"status"`
 	ExitCode  int    `json:"exitCode"`
 	Tail      string `json:"tail"`
@@ -122,6 +123,50 @@ func findWinget() string {
 		return path
 	}
 	return "winget"
+}
+
+// listDrives возвращает доступные корни дисков: C:\, D:\ и т.д.
+func listDrives() []string {
+	var out []string
+	for letter := 'C'; letter <= 'Z'; letter++ {
+		root := string(rune(letter)) + `:\`
+		if info, err := os.Stat(root); err == nil && info.IsDir() {
+			out = append(out, root)
+		}
+	}
+	return out
+}
+
+func suggestedLocations() []string {
+	out := []string{}
+	if local := os.Getenv("LOCALAPPDATA"); local != "" {
+		out = append(out, filepath.Join(local, "Programs"))
+	}
+	out = append(out, `C:\Program Files`)
+	for _, drive := range listDrives() {
+		if strings.EqualFold(drive, `C:\`) {
+			continue
+		}
+		out = append(out, filepath.Join(drive, "Programs"))
+	}
+	return out
+}
+
+// browseFolder показывает системный выбор папки через PowerShell и возвращает выбранный путь.
+func browseFolder() (string, error) {
+	script := `[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;` +
+		`Add-Type -AssemblyName System.Windows.Forms;` +
+		`$d = New-Object System.Windows.Forms.FolderBrowserDialog;` +
+		`$d.Description = 'Куда установить программу';` +
+		`$d.ShowNewFolderButton = $true;` +
+		`if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($d.SelectedPath) }`
+	cmd := exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-STA", "-Command", script)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("не удалось открыть выбор папки: %w", err)
+	}
+	return strings.TrimSpace(string(out)), nil
 }
 
 type collector struct {
@@ -190,7 +235,7 @@ func (h *Hub) rescan() {
 	h.mutex.Unlock()
 }
 
-func installArgs(appID, mode string, silent bool) []string {
+func installArgs(appID, mode string, silent bool, location string) []string {
 	verb := "install"
 	if mode == "upgrade" {
 		verb = "upgrade"
@@ -202,6 +247,9 @@ func installArgs(appID, mode string, silent bool) []string {
 	}
 	if silent {
 		args = append(args, "--silent")
+	}
+	if location != "" {
+		args = append(args, "--location", location)
 	}
 	return args
 }
@@ -233,15 +281,16 @@ func (h *Hub) finish(id, status string, exitCode int) {
 	j.EndedAt = time.Now().UnixMilli()
 }
 
-func (h *Hub) startJob(appID, mode string, silent bool) JobView {
+func (h *Hub) startJob(appID, mode string, silent bool, location string) JobView {
 	app := h.byID[appID]
-	args := installArgs(appID, mode, silent)
+	args := installArgs(appID, mode, silent, location)
 	j := &job{JobView: JobView{
 		ID:        fmt.Sprintf("%d-%s", time.Now().UnixNano(), appID),
 		AppID:     appID,
 		AppName:   app.Name,
 		Mode:      mode,
 		Command:   `"` + h.winget + `" ` + strings.Join(args, " "),
+		Location:  location,
 		Status:    "running",
 		ExitCode:  -1,
 		StartedAt: time.Now().UnixMilli(),
@@ -375,10 +424,13 @@ func (h *Hub) writeJSON(w http.ResponseWriter, code int, payload any) {
 }
 
 type request struct {
-	ID     string `json:"id"`
-	Silent bool   `json:"silent"`
-	JobID  string `json:"jobId"`
+	ID       string `json:"id"`
+	Silent   bool   `json:"silent"`
+	JobID    string `json:"jobId"`
+	Location string `json:"location"`
 }
+
+var absPath = regexp.MustCompile(`^[A-Za-z]:[\\/].+$`)
 
 func decodeRequest(w http.ResponseWriter, r *http.Request) (request, bool) {
 	var req request
@@ -423,6 +475,23 @@ func (h *Hub) handler() http.Handler {
 		h.writeJSON(w, 200, h.views())
 	})
 
+	mux.HandleFunc("/api/locations", func(w http.ResponseWriter, r *http.Request) {
+		h.writeJSON(w, 200, map[string]any{"drives": listDrives(), "suggested": suggestedLocations()})
+	})
+
+	mux.HandleFunc("/api/browse", func(w http.ResponseWriter, r *http.Request) {
+		path, err := browseFolder()
+		if err != nil {
+			h.writeJSON(w, 400, map[string]string{"error": err.Error()})
+			return
+		}
+		if path == "" {
+			h.writeJSON(w, 200, map[string]any{"canceled": true})
+			return
+		}
+		h.writeJSON(w, 200, map[string]any{"path": path})
+	})
+
 	mux.HandleFunc("/api/install", func(w http.ResponseWriter, r *http.Request) { h.act(w, r, "install") })
 	mux.HandleFunc("/api/upgrade", func(w http.ResponseWriter, r *http.Request) { h.act(w, r, "upgrade") })
 
@@ -453,7 +522,12 @@ func (h *Hub) act(w http.ResponseWriter, r *http.Request, mode string) {
 		h.writeJSON(w, 400, map[string]string{"error": "id отсутствует в каталоге — установка запрещена"})
 		return
 	}
-	h.writeJSON(w, 202, h.startJob(req.ID, mode, req.Silent))
+	location := strings.TrimSpace(req.Location)
+	if location != "" && (len(location) > 260 || !absPath.MatchString(location)) {
+		h.writeJSON(w, 400, map[string]string{"error": "путь должен быть абсолютным, вида D:\\Папка, и короче 260 символов"})
+		return
+	}
+	h.writeJSON(w, 202, h.startJob(req.ID, mode, req.Silent, location))
 }
 
 func messageBox(text, title string) {

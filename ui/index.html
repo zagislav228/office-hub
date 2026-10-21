@@ -39,6 +39,22 @@
   .sidefoot { border-top: 1px solid var(--line); padding: 12px 14px; display: grid; gap: 9px; }
   .switch { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12.5px; cursor: pointer; }
   .sidefoot .note { color: #6f7a8c; font-size: 11.5px; word-break: break-all; }
+  .loc { display: grid; gap: 7px; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+  .locrow { display: flex; gap: 6px; }
+  .locrow input {
+    flex: 1; min-width: 0; background: var(--raise); border: 1px solid var(--line); color: var(--text);
+    padding: 7px 9px; border-radius: 8px; font: 12px ui-monospace, Consolas, monospace;
+  }
+  .locrow input:focus { outline: none; border-color: var(--accent); }
+  .locrow .btn { padding: 6px 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip {
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--raise); color: var(--muted); cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.on { border-color: var(--accent); color: #cfe4ff; background: #16304a; }
   .btn {
     background: var(--raise); border: 1px solid var(--line); color: var(--text);
     padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 13.5px; white-space: nowrap;
@@ -132,6 +148,15 @@
     <div class="search"><input id="q" type="search" placeholder="Поиск: docx, таблица, почта…"></div>
     <nav id="nav"></nav>
     <div class="sidefoot">
+      <div class="loc">
+        <label class="switch"><input type="checkbox" id="useLoc"> Ставить в выбранную папку</label>
+        <div class="locrow">
+          <input id="loc" type="text" spellcheck="false" placeholder="D:\Programs">
+          <button class="btn" id="browse" title="Выбрать папку в проводнике">Обзор</button>
+        </div>
+        <div class="chips" id="locChips"></div>
+        <div class="note">Умеют не все пакеты: если инсталлер не поддерживает свою папку, winget поставит программу по умолчанию и напишет об этом в панели вывода.</div>
+      </div>
       <label class="switch"><input type="checkbox" id="silent"> Тихая установка (без окон)</label>
       <div class="note" id="wingetNote"></div>
     </div>
@@ -287,9 +312,10 @@ function renderPlan() {
 
 async function act(path, id) {
   const name = st.data.apps.find((a) => a.id === id).name;
+  const location = el('#useLoc').checked ? el('#loc').value.trim() : '';
   say('Запускаю: ' + name + '…');
   try {
-    await api(path, { id, silent: el('#silent').checked });
+    await api(path, { id, silent: el('#silent').checked, location });
     el('#jobsBox').classList.remove('hide', 'off');
     await tick();
     say(name + ': задача запущена');
@@ -300,7 +326,7 @@ function jobRow(j) {
   return `<div class="job">
     <div class="jr"><b>${esc(j.appName)}</b><span class="st ${esc(j.status)}">${esc(j.status)}</span>
       ${j.status === 'running' ? `<button class="btn" data-cancel="${esc(j.id)}">Отменить</button>` : ''}
-      <span class="spacer"></span><span class="muted" style="font-size:12px">${j.mode === 'upgrade' ? 'обновление' : 'установка'}</span></div>
+      <span class="spacer"></span><span class="muted" style="font-size:12px">${j.mode === 'upgrade' ? 'обновление' : 'установка'}${j.location ? ' → ' + esc(j.location) : ''}</span></div>
     <details><summary>вывод winget</summary><pre>${esc(j.tail || '(пока пусто)')}</pre></details>
   </div>`;
 }
@@ -319,8 +345,39 @@ async function tick() {
   return running;
 }
 
+function markChip() {
+  const v = el('#loc').value.trim();
+  el('#locChips').querySelectorAll('.chip').forEach((b) => b.classList.toggle('on', b.dataset.p === v));
+}
+
+async function loadLocations() {
+  const r = await api('/api/locations');
+  if (!el('#loc').value.trim()) el('#loc').value = r.suggested[0] || '';
+  el('#locChips').innerHTML = r.suggested.map((p) => `<button class="chip" data-p="${esc(p)}" title="${esc(p)}">${esc(p)}</button>`).join('');
+  el('#locChips').querySelectorAll('.chip').forEach((b) => {
+    b.onclick = () => { el('#loc').value = b.dataset.p; el('#useLoc').checked = true; markChip(); };
+  });
+  markChip();
+}
+
 el('#q').oninput = (e) => { st.q = e.target.value; render(); };
 el('#sort').onchange = (e) => { st.sort = e.target.value; render(); };
+el('#loc').oninput = markChip;
+el('#useLoc').onchange = markChip;
+el('#browse').onclick = async () => {
+  el('#browse').disabled = true;
+  say('Открываю выбор папки — диалог может оказаться под окном');
+  try {
+    const r = await api('/api/browse', {});
+    if (r.path) {
+      el('#loc').value = r.path;
+      el('#useLoc').checked = true;
+      markChip();
+      say('Папка для установки: ' + r.path, 'ok');
+    } else say('Выбор папки отменён');
+  } catch (e) { say(e.message, 'bad'); }
+  el('#browse').disabled = false;
+};
 el('#jobsHead').onclick = () => el('#jobsBox').classList.toggle('hide');
 el('#planClear').onclick = () => { st.plan.clear(); render(); };
 el('#planRun').onclick = async () => {
@@ -345,6 +402,7 @@ async function refreshInstalled() {
   st.data = await api('/api/catalog');
   el('#wingetNote').textContent = (st.data.dry ? 'dry: команды не выполняются · ' : '') + st.data.winget;
   render();
+  loadLocations();
   await tick();
   if (!st.data.scannedAt) setTimeout(refreshInstalled, 2000);
 })().catch((e) => say('Не удалось загрузить каталог: ' + e.message, 'bad'));

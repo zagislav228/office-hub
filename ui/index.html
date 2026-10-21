@@ -132,7 +132,6 @@
     <div class="search"><input id="q" type="search" placeholder="Поиск: docx, таблица, почта…"></div>
     <nav id="nav"></nav>
     <div class="sidefoot">
-      <button class="btn" id="scan">Что уже установлено</button>
       <label class="switch"><input type="checkbox" id="silent"> Тихая установка (без окон)</label>
       <div class="note" id="wingetNote"></div>
     </div>
@@ -259,7 +258,7 @@ function render() {
   const groups = [...order].map((cid) => [cid, apps.filter((a) => a.category === cid)]).filter(([, items]) => items.length);
   const cat = st.data.categories.find((c) => c.id === st.cat);
   el('#viewTitle').textContent = cat ? cat.title : 'Все программы';
-  el('#viewCount').textContent = `${apps.length} из ${st.data.apps.length} · установлено ${Object.keys(st.data.installed).length}`;
+  el('#viewCount').textContent = `${apps.length} из ${st.data.apps.length}`;
 
   el('#list').innerHTML = groups.map(([cid, items]) => {
     const c = st.data.categories.find((x) => x.id === cid);
@@ -315,24 +314,13 @@ async function tick() {
   el('#jobs').innerHTML = st.jobs.length ? st.jobs.map(jobRow).join('') : '<div class="empty">Задач пока нет. Нажмите «Установить» на карточке.</div>';
   el('#jobs').querySelectorAll('[data-cancel]').forEach((b) => { b.onclick = async () => { await api('/api/cancel', { jobId: b.dataset.cancel }); await tick(); render(); }; });
   clearTimeout(tick.timer);
-  if (running) { tick.timer = setTimeout(tick, 1200); render(); }
+  if (running) { st.wasRunning = true; tick.timer = setTimeout(tick, 1200); render(); }
+  else if (st.wasRunning) { st.wasRunning = false; await refreshInstalled(); }
   return running;
 }
 
 el('#q').oninput = (e) => { st.q = e.target.value; render(); };
 el('#sort').onchange = (e) => { st.sort = e.target.value; render(); };
-el('#scan').onclick = async () => {
-  el('#scan').disabled = true;
-  say('Сверяюсь с установленными в Windows…');
-  try {
-    const r = await api('/api/scan', {});
-    st.data.installed = r.installed;
-    st.data.scanError = r.error;
-    say(r.error ? r.error : `Проверено: установлено ${Object.keys(r.installed).length} из ${st.data.apps.length}`, r.error ? 'bad' : 'ok');
-  } catch (e) { say('winget недоступен: ' + e.message, 'bad'); }
-  el('#scan').disabled = false;
-  render();
-};
 el('#jobsHead').onclick = () => el('#jobsBox').classList.toggle('hide');
 el('#planClear').onclick = () => { st.plan.clear(); render(); };
 el('#planRun').onclick = async () => {
@@ -346,26 +334,19 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') { el('#q').value = ''; st.q = ''; render(); }
 });
 
-function reportScan() {
-  const n = Object.keys(st.data.installed).length;
-  if (st.data.scanError) say(st.data.scanError, 'bad');
-  else if (st.data.scannedAt) say(`Проверено: установлено ${n} из ${st.data.apps.length}`, 'ok');
+async function refreshInstalled() {
+  const data = await api('/api/catalog');
+  st.data = Object.assign(st.data, data);
+  if (data.scanError) say('Не удалось определить установленные: ' + data.scanError, 'bad');
+  render();
 }
 
 (async function boot() {
   st.data = await api('/api/catalog');
   el('#wingetNote').textContent = (st.data.dry ? 'dry: команды не выполняются · ' : '') + st.data.winget;
-  reportScan();
   render();
   await tick();
-  if (!st.data.scannedAt && !st.data.dry) {
-    say('Сверяюсь с установленными в Windows…');
-    setTimeout(async () => {
-      st.data = await api('/api/catalog');
-      reportScan();
-      render();
-    }, 2500);
-  }
+  if (!st.data.scannedAt) setTimeout(refreshInstalled, 2000);
 })().catch((e) => say('Не удалось загрузить каталог: ' + e.message, 'bad'));
 </script>
 </body>

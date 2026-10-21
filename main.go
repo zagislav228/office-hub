@@ -156,9 +156,6 @@ func (h *Hub) runWinget(args ...string) (string, error) {
 }
 
 func (h *Hub) rescan() {
-	if h.dry {
-		return
-	}
 	out, err := h.runWinget("list", "--accept-source-agreements", "--disable-interactivity")
 	if err != nil {
 		h.mutex.Lock()
@@ -424,14 +421,6 @@ func (h *Hub) handler() http.Handler {
 
 	mux.HandleFunc("/api/jobs", func(w http.ResponseWriter, r *http.Request) {
 		h.writeJSON(w, 200, h.views())
-	})
-
-	mux.HandleFunc("/api/scan", func(w http.ResponseWriter, r *http.Request) {
-		h.rescan()
-		h.mutex.Lock()
-		payload := map[string]any{"installed": h.installed, "scannedAt": h.scannedAt, "error": h.scanErr, "winget": h.winget}
-		h.mutex.Unlock()
-		h.writeJSON(w, 200, payload)
 	})
 
 	mux.HandleFunc("/api/install", func(w http.ResponseWriter, r *http.Request) { h.act(w, r, "install") })
